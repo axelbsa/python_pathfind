@@ -14,7 +14,16 @@ static PyObject* say_hello(PyObject* self, PyObject* args)
 
 static PyObject* ret4(PyObject* self, PyObject* args)
 {
-	Py_RETURN_NONE;
+    int i;
+    int len = 0;
+	if (!PyArg_ParseTuple(args, "i", &len))
+		return NULL;
+    PyObject *lst = PyList_New(len);
+    for(i=0; i<len; i++){
+        PyList_SET_ITEM(lst, i, Py_BuildValue("i", i) );
+    }
+    return lst;
+	//return Py_BuildValue("i", 4);
 }
 
 static PyMethodDef HelloMethods[] =
