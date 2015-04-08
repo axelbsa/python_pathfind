@@ -4,7 +4,7 @@ from distutils.core import setup, Extension
 # To Build: python setup.py build
 #           then copy so file to current dir
  
-module1 = Extension('astar', sources = ['main.cpp'])
+module1 = Extension('astar', sources = ['src/main.cpp'])
  
 setup (name = 'PackageName',
         version = '1.0',
