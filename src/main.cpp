@@ -4,7 +4,7 @@
 
 int items_added = 0;
 
-long int map[200];
+static long int map[20];
 
 int path[10][10] = {
     {1,1,1,1,1,1,1,1,1,1},
@@ -57,44 +57,59 @@ void add_items() {
 
 static PyObject* set_map(PyObject* self, PyObject* args) {
 
+    int x;
+    int y;
     PyObject *obj;
 
-    if (!PyArg_ParseTuple(args, "O", &obj)) {
-      // error
+
+    if (!PyArg_ParseTuple(args, "iiO", &y, &x, &obj)) {
+        // error
+        PyErr_SetString(PyExc_TypeError, "set_map() takes 3 arguments");
+        return NULL;
     }
 
     PyObject *iter = PyObject_GetIter(obj);
     if (!iter) {
-      // error not iterator
+        // error not iterator
+        return Py_BuildValue("i", -1);
     }
 
     int i = 0;
 
     while (true) {
-      PyObject *next = PyIter_Next(iter);
-      if (!next) {
-        // nothing left in the iterator
-        break;
-      }
+        PyObject *next = PyIter_Next(iter);
+        if (!next) {
+            // nothing left in the iterator
+            break;
+        }
 
-      if (!PyInt_Check(next)) {
-        // error, we were expecting a floating point value
-      }
+        if (!PyInt_Check(next)) {
+            // error, we were expecting a floating point value
+            PyErr_SetString(PyExc_AttributeError, "expecting integer list");
+            return NULL;
+            //return Py_BuildValue("s", "expexting integer");
+        }
 
-      long int foo = PyInt_AsLong(next);
-      // do something with foo
-      map[i] = foo;
+        // do something with foo
+        long int foo = PyInt_AsLong(next);
+        map[i] = foo;
+
     }
-	return Py_BuildValue("i", 0);
+    return Py_BuildValue("i", 0);
 }
 
 static PyObject* get_map(PyObject* self, PyObject* args){
+    int i;
+    int len = 0;
 
-	Py_RETURN_NONE;
+    PyObject *lst = PyList_New(len);
+    for(i=0; i<20; i++){
+        PyList_SET_ITEM(lst, i, Py_BuildValue("i", map[i]) );
+    }
+    return lst;
 }
 
-static PyObject* say_hello(PyObject* self, PyObject* args)
-{
+static PyObject* say_hello(PyObject* self, PyObject* args) {
 	const char* name;
 
 	if (!PyArg_ParseTuple(args, "s", &name))
@@ -105,8 +120,7 @@ static PyObject* say_hello(PyObject* self, PyObject* args)
 	Py_RETURN_NONE;
 }
 
-static PyObject* ret4(PyObject* self, PyObject* args)
-{
+static PyObject* ret4(PyObject* self, PyObject* args) {
     int i;
     int len = 0;
 	if (!PyArg_ParseTuple(args, "i", &len))
