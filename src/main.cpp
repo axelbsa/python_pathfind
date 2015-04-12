@@ -3,6 +3,8 @@
 #include <Python.h>
 #include "structmember.h"
 
+#include "common.h"
+
 int items_added = 0;
 
 static long int map[20];
@@ -25,6 +27,12 @@ typedef struct {
     PyObject * dict;
     int count;
 } CDict;
+
+typedef struct {
+    PyObject_HEAD
+    PyObject * list;
+    int count;
+} Map;
 
 struct Points {
     int x;
@@ -146,7 +154,7 @@ static PyObject *CDict_set(CDict *self, PyObject *args)
 {
    const char *key;
    PyObject *value;
-    
+
    if (!PyArg_ParseTuple(args, "sO:set", &key, &value)) {
       return NULL;
    }
@@ -154,9 +162,9 @@ static PyObject *CDict_set(CDict *self, PyObject *args)
    if (PyDict_SetItemString(self->dict, key, value) < 0) {
       return NULL;
    }
-    
+
    self->count++;
-    
+
    return Py_BuildValue("i", self->count);
 }
 
@@ -171,7 +179,7 @@ static void CDict_dealloc(CDict *self) {
     self->ob_type->tp_free((PyObject*)self);
 }
 
-static PyMemberDef CDict_members[] = 
+static PyMemberDef CDict_members[] =
 {
     {"dict", T_OBJECT, offsetof(CDict, dict), 0, "HABBLAHABBLA"},
     {"count", T_INT, offsetof(CDict, count), 0, "HIBBLOGIBBLO"},
@@ -194,8 +202,7 @@ static PyMethodDef HelloMethods[] =
 	{ NULL, NULL, 0, NULL }
 };
 
-static PyTypeObject
-CDictType = {
+static PyTypeObject CDictType = {
    PyObject_HEAD_INIT(NULL)
    0,                         /* ob_size */
    "CDict",               /* tp_name */
@@ -236,6 +243,7 @@ CDictType = {
    0,                         /* tp_alloc */
    0,                         /* tp_new */
 };
+
 
 PyMODINIT_FUNC initastar(void)
 {
