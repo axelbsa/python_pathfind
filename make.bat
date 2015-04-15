@@ -18,7 +18,7 @@ SET VS90COMNTOOLS=%VS120COMNTOOLS%
 
 
 @ECHO ON
-python setup.py build
+python setup.py build_ext -i
 @ECHO OFF
 if exist "astar.pyd" (
     del astar.pyd

@@ -6,6 +6,7 @@
 #include "common.h"
 
 int items_added = 0;
+int fdsfdsf = 0;
 
 static long int map[20];
 
@@ -245,11 +246,11 @@ static PyTypeObject CDictType = {
 };
 
 
-PyMODINIT_FUNC initastar(void)
+PyMODINIT_FUNC initpathfinding(void)
 {
     PyObject* mod;
-    (void)Py_InitModule("astar", HelloMethods);
-    mod = Py_InitModule("astar", CDict_methods);
+    (void)Py_InitModule("pathfinding", HelloMethods);
+    mod = Py_InitModule("pathfinding", CDict_methods);
     // Fill in some slots in the type, and make it ready
     CDictType.tp_new = PyType_GenericNew;
     if (PyType_Ready(&CDictType) < 0) {
