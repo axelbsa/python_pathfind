@@ -70,6 +70,8 @@ void add_items() {
     }
 }
 
+
+
 static PyObject* set_map(PyObject* self, PyObject* args) {
 
     int x;
@@ -115,11 +117,9 @@ static PyObject* set_map(PyObject* self, PyObject* args) {
 
 static PyObject* get_map(PyObject* self, PyObject* args){
     int i;
-    int len = 20;
+    int len = 0;
 
     PyObject *lst = PyList_New(len);
-    PyObject *lst2 = PyList_New(len);
-
     for(i=0; i<20; i++){
         PyList_SET_ITEM(lst, i, Py_BuildValue("i", map[i]) );
     }
@@ -141,10 +141,8 @@ static PyObject* ret4(PyObject* self, PyObject* args)
 {
     int i;
     int len = 0;
-	if (!PyArg_ParseTuple(args, "i", &len)) 
-    {
+	if (!PyArg_ParseTuple(args, "i", &len)) {
 		return NULL;
-    }
     PyObject *lst = PyList_New(len);
     for(i=0; i<len; i++){
         PyList_SET_ITEM(lst, i, Py_BuildValue("i", i) );
