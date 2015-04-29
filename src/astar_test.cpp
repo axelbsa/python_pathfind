@@ -29,19 +29,19 @@ struct Points {
     int gcost;
     struct Points *parent;
     UT_hash_handle hh;
-}POINT;
+} POINT;
 
 typedef struct open_list {
     int id;
     struct Points *p;
     UT_hash_handle hh;
-}OPEN_LIST;
+} OPEN_LIST;
 
 typedef struct closed_list {
     int id;
     struct Points *p;
     UT_hash_handle hh;
-}CLOSED_LIST;
+} CLOSED_LIST;
 
 struct Points *point = NULL;
 OPEN_LIST *olist = NULL;
@@ -55,7 +55,7 @@ void add_node(int _id, int x, int y) {
     p->id = _id;
     p->x = x;
     p->y = y;
-    HASH_ADD_INT( point, id, p );  /* id: name of key field */
+    HASH_ADD_INT(point, id, p);  /* id: name of key field */
 }
 
 struct Points *find_node(int _id) {
@@ -84,7 +84,12 @@ int manhatten(int sy, int sx, int dy, int dx) {
 
 void find_adj(){}
 
-void find_lowest(){}
+void find_lowest(){
+    struct open_list *s;
+    for(s=olist; s != NULL; s=s->hh.next) {
+        printf("user id %d: x:%d y:%d\n", s->id, s->p->x, s->p->y);
+    }
+}
 
 void search(int sy, int sx, int dy, int dx) {
     struct Points *s_node = NULL;
@@ -97,7 +102,7 @@ void search(int sy, int sx, int dy, int dx) {
     o = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
     o->id = s_node->id;
     o->p = s_node;
-    HASH_ADD_INT( olist, id, o);  /* id: name of key field */
+    HASH_ADD_INT(olist, id, o);
 
     while(HASH_COUNT(olist)){
         find_lowest();
