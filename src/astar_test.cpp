@@ -2,6 +2,7 @@
 #include <math.h>
 #include "uthash.h"
 
+bool first = false;
 int items_added = 0;
 
 int mapWidth = 10;
@@ -82,19 +83,27 @@ int manhatten(int sy, int sx, int dy, int dx) {
     return 2 * (dx + dy);
 }
 
-void find_adj(){}
+void find_adj(struct Points *p){
+    OPEN_LIST *s = NULL;
+    s = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
+
+   // HASH_FIND_INT( point, &star_node, s );
+}
 
 void find_lowest(){
-    struct open_list *s;
-    for(s=olist; s != NULL; s=s->hh.next) {
+    OPEN_LIST *s = NULL;
+    s = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
+    for(s=olist; s != NULL; s=(OPEN_LIST*)s->hh.next) {
         printf("user id %d: x:%d y:%d\n", s->id, s->p->x, s->p->y);
     }
 }
 
 void search(int sy, int sx, int dy, int dx) {
+    int start_node = (10*sy)+sx;
+
     struct Points *s_node = NULL;
     s_node = (struct Points*)malloc(sizeof(POINT));
-    s_node = find_node((10*sy)+sx);
+    s_node = find_node(start_node);
 
     printf("Node id:%d\n", s_node->id);
 
@@ -104,11 +113,13 @@ void search(int sy, int sx, int dy, int dx) {
     o->p = s_node;
     HASH_ADD_INT(olist, id, o);
 
+    find_adj(s_node);
+
     while(HASH_COUNT(olist)){
         find_lowest();
-
-        find_adj();
-        printf("Distance: %d\n",manhatten(sy,sx, dy, dx));
+        //find_adj();
+        printf("Distance: %d\n", manhatten(sy, sx, dy, dx));
+        printf("Distance: %d\n", manhatten(sy, sx, dy, dx));
     }
 }
 
