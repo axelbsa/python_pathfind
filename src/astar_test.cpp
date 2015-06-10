@@ -83,9 +83,68 @@ int manhatten(int sy, int sx, int dy, int dx) {
     return 2 * (dx + dy);
 }
 
-void find_adj(struct Points *p){
-    OPEN_LIST *s = NULL;
-    s = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
+void find_adj(int sy, int sx){
+
+    /* Representation of adjecent
+     * nodes
+     * +-----+
+     * |7|3|4|
+     * |2|S|0|
+     * |6|1|5|
+     * +-----+
+     */
+
+    for(int i=0; i<7; i++){
+        OPEN_LIST *s = NULL;
+        s = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
+
+        int start_node = 0;
+        struct Points *s_node = NULL;
+        s_node = (struct Points*)malloc(sizeof(POINT));
+
+        switch(i){
+            case 0:
+                start_node = (10*sy)+sx+1;
+                s_node = find_node(start_node);
+                break;
+
+            case 1:
+                start_node = (10*(sy+1))+sx;
+                s_node = find_node(start_node);
+            break;
+
+            case 2:
+                start_node = (10*sy)+sx-1;
+                s_node = find_node(start_node);
+            break;
+
+            case 3:
+                start_node = (10*(sy+1))+sx;
+                s_node = find_node(start_node);
+            break;
+
+            case 4:
+                start_node = (10*(sy-1))+sx+1;
+                s_node = find_node(start_node);
+            break;
+
+            case 5:
+                start_node = (10*(sy+1))+sx+1;
+                s_node = find_node(start_node);
+            break;
+
+            case 6:
+                start_node = (10*(sy+1))+sx-1;
+                s_node = find_node(start_node);
+            break;
+
+            case 7:
+                start_node = (10*(sy-1))+sx-1;
+                s_node = find_node(start_node);
+            break;
+
+        }
+    }
 
    // HASH_FIND_INT( point, &star_node, s );
 }
@@ -113,7 +172,7 @@ void search(int sy, int sx, int dy, int dx) {
     o->p = s_node;
     HASH_ADD_INT(olist, id, o);
 
-    find_adj(s_node);
+    find_adj(s_node->y, s_node->x);
 
     while(HASH_COUNT(olist)){
         find_lowest();
