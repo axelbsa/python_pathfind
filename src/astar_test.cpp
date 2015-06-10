@@ -30,33 +30,42 @@ struct Points {
     int gcost;
     struct Points *parent;
     UT_hash_handle hh;
-} POINT;
+};
 
-typedef struct open_list {
+struct open_list {
     int id;
     struct Points *p;
     UT_hash_handle hh;
-} OPEN_LIST;
+};
 
-typedef struct closed_list {
+struct closed_list {
     int id;
     struct Points *p;
     UT_hash_handle hh;
-} CLOSED_LIST;
+};
+
+typedef struct open_list OPEN_LIST;
+typedef struct open_list CLOSED_LIST;
+typedef struct Points POINT;
 
 struct Points *point = NULL;
-OPEN_LIST *olist = NULL;
+struct open_list *olist = NULL;
 CLOSED_LIST *clist = NULL;
 
-void add_node(int _id, int x, int y) {
-    struct Points *p = NULL;
-    printf("Adding nodeid:%d\n", _id);
+struct Points *add_node(int _id, int x, int y, struct Points *parent) {
 
-    p = (struct Points*)malloc(sizeof(POINT));
+    struct Points *p = NULL;
+    p = (POINT*)malloc(sizeof(POINT));
     p->id = _id;
     p->x = x;
     p->y = y;
+
+    if(parent)
+        p->parent = parent;
+
     HASH_ADD_INT(point, id, p);  /* id: name of key field */
+    printf("Adding nodeid:%d\n", _id);
+    return p;
 }
 
 struct Points *find_node(int _id) {
@@ -66,11 +75,12 @@ struct Points *find_node(int _id) {
 }
 
 void add_items() {
+    struct Points *parent = NULL;
     int i,j;
     for(i=0; i<10; i++){
         for(j=0; j<10; j++){
             printf("%i ", path[i][j]);
-            add_node((i*10)+j, j, i);
+            parent = add_node((i*10)+j, j, i, parent);
             items_added++;
         }
         printf("\n");
@@ -94,66 +104,135 @@ void find_adj(int sy, int sx){
      * +-----+
      */
 
-    for(int i=0; i<7; i++){
-        OPEN_LIST *s = NULL;
-        s = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
+    int _id;
+    int start_node;
+    for(int i=0; i<8; i++){
 
-        int start_node = 0;
+        struct open_list *o = NULL;
+        o = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
+        
         struct Points *s_node = NULL;
-        s_node = (struct Points*)malloc(sizeof(POINT));
+        s_node = (struct Points*)malloc(sizeof(struct Points));
+
+        _id = 0;
+        start_node = 0;
 
         switch(i){
             case 0:
                 start_node = (10*sy)+sx+1;
                 s_node = find_node(start_node);
+                if(!s_node)
+                    break;
+                _id = s_node->id;
+                o->id = _id;
+                o->p = s_node;
+                HASH_ADD_INT(olist, id, o);
                 break;
 
             case 1:
                 start_node = (10*(sy+1))+sx;
                 s_node = find_node(start_node);
+                if(!s_node)
+                    break;
+                _id = s_node->id;
+                o->id = _id;
+                o->p = s_node;
+                HASH_ADD_INT(olist, id, o);
             break;
 
             case 2:
                 start_node = (10*sy)+sx-1;
                 s_node = find_node(start_node);
+                if(!s_node)
+                    break;
+                _id = s_node->id;
+                o->id = _id;
+                o->p = s_node;
+                HASH_ADD_INT(olist, id, o);
             break;
 
             case 3:
-                start_node = (10*(sy+1))+sx;
+                start_node = (10*(sy-1))+sx;
                 s_node = find_node(start_node);
+                if(!s_node)
+                    break;
+                _id = s_node->id;
+                o->id = _id;
+                o->p = s_node;
+                HASH_ADD_INT(olist, id, o);
             break;
 
             case 4:
                 start_node = (10*(sy-1))+sx+1;
                 s_node = find_node(start_node);
+                if(!s_node)
+                    break;
+                _id = s_node->id;
+                o->id = _id;
+                o->p = s_node;
+                HASH_ADD_INT(olist, id, o);
             break;
 
             case 5:
                 start_node = (10*(sy+1))+sx+1;
                 s_node = find_node(start_node);
+                if(!s_node)
+                    break;
+                _id = s_node->id;
+                o->id = _id;
+                o->p = s_node;
+                HASH_ADD_INT(olist, id, o);
             break;
 
             case 6:
                 start_node = (10*(sy+1))+sx-1;
                 s_node = find_node(start_node);
+                if(!s_node)
+                    break;
+                _id = s_node->id;
+                o->id = _id;
+                o->p = s_node;
+                HASH_ADD_INT(olist, id, o);
             break;
 
             case 7:
                 start_node = (10*(sy-1))+sx-1;
                 s_node = find_node(start_node);
+                if(!s_node)
+                    break;
+                _id = s_node->id;
+                o->id = _id;
+                o->p = s_node;
+                HASH_ADD_INT(olist, id, o);
             break;
-
         }
     }
 
    // HASH_FIND_INT( point, &star_node, s );
 }
 
+void list_points(){
+    struct Points *s;
+
+    for(s=point; s != NULL; s=(struct Points*)(s->hh.next)) {
+        printf("S %d\n", &s->hh.next);
+        printf("Node: id %d: x:%d y:%d\n", s->id, s->x, s->y);
+    }
+}
+
 void find_lowest(){
-    OPEN_LIST *s = NULL;
-    s = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
-    for(s=olist; s != NULL; s=(OPEN_LIST*)s->hh.next) {
-        printf("user id %d: x:%d y:%d\n", s->id, s->p->x, s->p->y);
+    int iter = 0;
+    struct open_list *s, *tmp;
+
+    //s = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
+    //HASH_ITER(hh, olist, s, tmp) {
+        //printf("Node: id %d: x:%d y:%d\n", s->id, s->p->x, s->p->y);
+        //printf("We have now cycled through %d times \n", iter++);
+    //}
+
+    for(s=olist; s != NULL; s=(OPEN_LIST*)(s->hh.next)) {
+        printf("S %d\n", &s->hh.next);
+        printf("Node: id %d: x:%d y:%d\n", s->id, s->p->x, s->p->y);
     }
 }
 
@@ -161,29 +240,35 @@ void search(int sy, int sx, int dy, int dx) {
     int start_node = (10*sy)+sx;
 
     struct Points *s_node = NULL;
-    s_node = (struct Points*)malloc(sizeof(POINT));
+    s_node = (struct Points*)malloc(sizeof(struct Points));
     s_node = find_node(start_node);
 
-    printf("Node id:%d\n", s_node->id);
+    printf("Node: id %d: x:%d y:%d\n", s_node->id, s_node->x, s_node->y);
 
-    OPEN_LIST *o = NULL;
+    int _id = s_node->id;
+    struct open_list *o = NULL;
     o = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
-    o->id = s_node->id;
+    o->id = _id;
     o->p = s_node;
     HASH_ADD_INT(olist, id, o);
 
     find_adj(s_node->y, s_node->x);
+    find_lowest();
 
-    while(HASH_COUNT(olist)){
-        find_lowest();
-        //find_adj();
-        printf("Distance: %d\n", manhatten(sy, sx, dy, dx));
-        printf("Distance: %d\n", manhatten(sy, sx, dy, dx));
-    }
+    int hcount = HASH_COUNT(olist);
+    printf("HCOUNT: %d\n", hcount);
+
+    //for(int i=0; i<hcount; i++){
+        //printf("Distance: %d\n", manhatten(sy, sx, dy, dx));
+        //find_lowest();
+        ////find_adj();
+    //}
+
+    free(o);
 }
 
 int main() {
     add_items();
-    search(0,0,9,9);
+    search(1,1,9,9);
     return 0;
 }
