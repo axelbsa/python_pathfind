@@ -269,6 +269,6 @@ void search(int sy, int sx, int dy, int dx) {
 
 int main() {
     add_items();
-    search(1,1,9,9);
+    search(0,0,9,9);
     return 0;
 }
