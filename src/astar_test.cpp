@@ -233,7 +233,10 @@ void find_lowest(){
     for(s=olist; s != NULL; s=(OPEN_LIST*)(s->hh.next)) {
         printf("S %d\n", &s->hh.next);
         printf("Node: id %d: x:%d y:%d\n", s->id, s->p->x, s->p->y);
-    }
+    //OPEN_LIST *s;
+    //for(s=olist; s != NULL; s=s->hh.next) {
+    //    printf("user id %d: x:%d y:%d\n", s->id, s->p->x, s->p->y);
+    //}
 }
 
 void search(int sy, int sx, int dy, int dx) {
