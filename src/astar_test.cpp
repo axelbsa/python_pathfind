@@ -10,14 +10,14 @@ int mapHeight = 10;
 
 int path[10][10] = {
     {0,0,0,0,0,0,1,1,1,1},
-    {0,1,1,1,1,0,1,1,1,1},
+    {0,0,1,1,1,0,1,1,1,1},
     {0,1,1,1,1,0,1,1,1,1},
     {0,1,1,1,1,0,1,1,1,1},
     {0,0,0,0,1,0,1,1,1,1},
     {1,1,1,0,1,0,1,1,1,1},
     {1,1,0,0,1,0,1,1,1,1},
     {1,1,0,1,0,0,0,0,1,1},
-    {1,1,0,1,1,0,1,0,1,1},
+    {1,1,0,1,1,0,1,0,0,1},
     {1,1,0,0,0,0,1,0,0,0},
 };
 
@@ -52,6 +52,9 @@ struct Points *point = NULL;
 struct open_list *olist = NULL;
 CLOSED_LIST *clist = NULL;
 
+int START_NODE = 0;
+int END_NODE = 0;
+
 struct Points *add_node(int _id, int x, int y, struct Points *parent) {
 
     struct Points *p = NULL;
@@ -64,7 +67,7 @@ struct Points *add_node(int _id, int x, int y, struct Points *parent) {
         p->parent = parent;
 
     HASH_ADD_INT(point, id, p);  /* id: name of key field */
-    printf("Adding nodeid:%d\n", _id);
+    //printf("Adding nodeid:%d\n", _id);
     return p;
 }
 
@@ -74,23 +77,28 @@ struct Points *find_node(int _id) {
     return s;
 }
 
-void add_items() {
+void add_items(int sy=0, int sx=0, int dy=0, int dx=0) {
+	START_NODE = (10*sy) + sx;
+	END_NODE = (10*dy) + dx; 
     struct Points *parent = NULL;
     int i,j;
     for(i=0; i<10; i++){
         for(j=0; j<10; j++){
-            printf("%i ", path[i][j]);
+        	int c_node = (i*10)+j;
+        	
+        	if (c_node == START_NODE){
+				printf("S ");
+        	}else if(c_node == END_NODE){
+				printf("E ");
+        	}else{
+            	printf("%i ", path[i][j]);
+        	}
+
             parent = add_node((i*10)+j, j, i, parent);
             items_added++;
         }
         printf("\n");
     }
-}
-
-int manhatten(int sy, int sx, int dy, int dx) {
-    int tx = abs(sx - dx);
-    int ty = abs(sy - dy);
-    return 2 * (dx + dy);
 }
 
 void find_adj(int sy, int sx){
@@ -220,8 +228,14 @@ void list_points(){
     }
 }
 
-void find_lowest(){
-    int iter = 0;
+int manhatten(int sy, int sx, int dy, int dx) {
+    int tx = abs(sx - dx);
+    int ty = abs(sy - dy);
+    return (2 * (tx + ty));
+}
+
+int find_lowest(){
+    int lowest = 0;
     struct open_list *s, *tmp;
 
     //s = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
@@ -232,11 +246,19 @@ void find_lowest(){
 
     for(s=olist; s != NULL; s=(OPEN_LIST*)(s->hh.next)) {
         printf("S %d\n", &s->hh.next);
-        printf("Node: id %d: x:%d y:%d\n", s->id, s->p->x, s->p->y);
+        int cur = manhatten(s->p->y, s->p->x, END_NODE/10, END_NODE%10);
+        printf("Distance: %d\n", cur);
+        if (cur < lowest){
+        	lowest = cur;
+        }
+    }
+
     //OPEN_LIST *s;
     //for(s=olist; s != NULL; s=s->hh.next) {
     //    printf("user id %d: x:%d y:%d\n", s->id, s->p->x, s->p->y);
     //}
+    
+    return lowest;
 }
 
 void search(int sy, int sx, int dy, int dx) {
@@ -246,7 +268,7 @@ void search(int sy, int sx, int dy, int dx) {
     s_node = (struct Points*)malloc(sizeof(struct Points));
     s_node = find_node(start_node);
 
-    printf("Node: id %d: x:%d y:%d\n", s_node->id, s_node->x, s_node->y);
+    //printf("Node: id %d: y:%d x:%d\n", s_node->id, s_node->y, s_node->x);
 
     int _id = s_node->id;
     struct open_list *o = NULL;
@@ -256,22 +278,23 @@ void search(int sy, int sx, int dy, int dx) {
     HASH_ADD_INT(olist, id, o);
 
     find_adj(s_node->y, s_node->x);
-    find_lowest();
+    int lowest = find_lowest();
+    printf("Distance: %d\n", lowest);
 
     int hcount = HASH_COUNT(olist);
-    printf("HCOUNT: %d\n", hcount);
+    printf("hcount: %d\n", hcount);
 
-    //for(int i=0; i<hcount; i++){
+    for(int i=0; i<hcount; i++){
         //printf("Distance: %d\n", manhatten(sy, sx, dy, dx));
         //find_lowest();
         ////find_adj();
-    //}
+    }
 
     free(o);
 }
 
 int main() {
-    add_items();
-    search(0,0,9,9);
+    add_items(1,1,8,8);
+    search(1,1,8,8);
     return 0;
 }
