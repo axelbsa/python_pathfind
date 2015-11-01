@@ -45,12 +45,12 @@ struct closed_list {
 };
 
 typedef struct open_list OPEN_LIST;
-typedef struct open_list CLOSED_LIST;
+typedef struct closed_list CLOSED_LIST;
 typedef struct Points POINT;
 
 struct Points *point = NULL;
 struct open_list *olist = NULL;
-CLOSED_LIST *clist = NULL;
+struct closed_list *clist = NULL;
 
 int START_NODE = 0;
 int END_NODE = 0;
@@ -101,7 +101,7 @@ void add_items(int sy=0, int sx=0, int dy=0, int dx=0) {
     }
 }
 
-void find_adj(int sy, int sx){
+void find_adj(int sy, int sx, int successors[]){
 
     /* Representation of adjecent
      * nodes
@@ -131,10 +131,7 @@ void find_adj(int sy, int sx){
                 s_node = find_node(start_node);
                 if(!s_node)
                     break;
-                _id = s_node->id;
-                o->id = _id;
-                o->p = s_node;
-                HASH_ADD_INT(olist, id, o);
+                successors[i] = start_node;
                 break;
 
             case 1:
@@ -142,10 +139,7 @@ void find_adj(int sy, int sx){
                 s_node = find_node(start_node);
                 if(!s_node)
                     break;
-                _id = s_node->id;
-                o->id = _id;
-                o->p = s_node;
-                HASH_ADD_INT(olist, id, o);
+                successors[i] = start_node;
             break;
 
             case 2:
@@ -153,10 +147,7 @@ void find_adj(int sy, int sx){
                 s_node = find_node(start_node);
                 if(!s_node)
                     break;
-                _id = s_node->id;
-                o->id = _id;
-                o->p = s_node;
-                HASH_ADD_INT(olist, id, o);
+                successors[i] = start_node;
             break;
 
             case 3:
@@ -164,10 +155,7 @@ void find_adj(int sy, int sx){
                 s_node = find_node(start_node);
                 if(!s_node)
                     break;
-                _id = s_node->id;
-                o->id = _id;
-                o->p = s_node;
-                HASH_ADD_INT(olist, id, o);
+                successors[i] = start_node;
             break;
 
             case 4:
@@ -175,10 +163,7 @@ void find_adj(int sy, int sx){
                 s_node = find_node(start_node);
                 if(!s_node)
                     break;
-                _id = s_node->id;
-                o->id = _id;
-                o->p = s_node;
-                HASH_ADD_INT(olist, id, o);
+                successors[i] = start_node;
             break;
 
             case 5:
@@ -186,10 +171,7 @@ void find_adj(int sy, int sx){
                 s_node = find_node(start_node);
                 if(!s_node)
                     break;
-                _id = s_node->id;
-                o->id = _id;
-                o->p = s_node;
-                HASH_ADD_INT(olist, id, o);
+                successors[i] = start_node;
             break;
 
             case 6:
@@ -197,10 +179,7 @@ void find_adj(int sy, int sx){
                 s_node = find_node(start_node);
                 if(!s_node)
                     break;
-                _id = s_node->id;
-                o->id = _id;
-                o->p = s_node;
-                HASH_ADD_INT(olist, id, o);
+                successors[i] = start_node;
             break;
 
             case 7:
@@ -208,15 +187,19 @@ void find_adj(int sy, int sx){
                 s_node = find_node(start_node);
                 if(!s_node)
                     break;
-                _id = s_node->id;
-                o->id = _id;
-                o->p = s_node;
-                HASH_ADD_INT(olist, id, o);
+                successors[i] = start_node;
             break;
         }
     }
 
    // HASH_FIND_INT( point, &star_node, s );
+}
+
+void list_open(){
+    struct open_list *s, *tmp;
+    for(s=olist; s != NULL; s=(OPEN_LIST*)(s->hh.next)) {
+    	printf("Node: x:%d y:%d - distance: %d\n", s->p->y, s->p->x);
+    }
 }
 
 void list_points(){
@@ -235,7 +218,8 @@ int manhatten(int sy, int sx, int dy, int dx) {
 }
 
 int find_lowest(){
-    int lowest = 0;
+    int lowest = 99999;
+    int _id = 0;
     struct open_list *s, *tmp;
 
     //s = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
@@ -245,11 +229,12 @@ int find_lowest(){
     //}
 
     for(s=olist; s != NULL; s=(OPEN_LIST*)(s->hh.next)) {
-        printf("S %d\n", &s->hh.next);
+        //printf("S %d\n", &s->hh.next);
         int cur = manhatten(s->p->y, s->p->x, END_NODE/10, END_NODE%10);
-        printf("Distance: %d\n", cur);
+        printf("Node: x:%d y:%d - distance: %d\n", s->p->y, s->p->x, cur);
         if (cur < lowest){
         	lowest = cur;
+        	_id = (10*s->p->y)+s->p->x;
         }
     }
 
@@ -258,39 +243,67 @@ int find_lowest(){
     //    printf("user id %d: x:%d y:%d\n", s->id, s->p->x, s->p->y);
     //}
     
-    return lowest;
+    return _id;
 }
 
 void search(int sy, int sx, int dy, int dx) {
+    int lowest = 0;
     int start_node = (10*sy)+sx;
-
     struct Points *s_node = NULL;
+
     s_node = (struct Points*)malloc(sizeof(struct Points));
     s_node = find_node(start_node);
 
     //printf("Node: id %d: y:%d x:%d\n", s_node->id, s_node->y, s_node->x);
 
-    int _id = s_node->id;
     struct open_list *o = NULL;
+    struct closed_list *c = NULL;
+    c = (CLOSED_LIST*)malloc(sizeof(CLOSED_LIST));
+
+    int _id = s_node->id;
     o = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
     o->id = _id;
     o->p = s_node;
+    o->p->fcost = 0;
     HASH_ADD_INT(olist, id, o);
 
-    find_adj(s_node->y, s_node->x);
-    int lowest = find_lowest();
-    printf("Distance: %d\n", lowest);
+    int successors[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    
+    while(HASH_COUNT(olist) > 0){
+    	lowest = find_lowest();
+    	s_node = find_node(lowest);
+    	
+    	int fcost = s_node->fcost;
+    	int gcost = s_node->gcost;
 
-    int hcount = HASH_COUNT(olist);
-    printf("hcount: %d\n", hcount);
+    	struct open_list *del = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
+    	HASH_FIND_INT( olist, &s_node->id, del );
+    	HASH_DEL(olist, del);
+	    
+	    find_adj(s_node->y, s_node->x, successors);	    
+	    printf("Lowest found was: %d\n", lowest);
 
-    for(int i=0; i<hcount; i++){
-        //printf("Distance: %d\n", manhatten(sy, sx, dy, dx));
-        //find_lowest();
-        ////find_adj();
-    }
+	    for(int i=0; i<8; i++){
+	    	s_node = find_node(successors[i]);
+	    	if ((10*s_node->y)+s_node->x == END_NODE)
+	    		break;
+	        printf("Inner loop: y:%d x:%d\n", s_node->y, s_node->x);
+	        o->id = s_node->id;
+    		o->p = s_node;
+    		o->p->fcost = 0;
+    		HASH_ADD_INT(olist, id, o);
+	    }
+	    //c->id = s_node->id
+
+		//HASH_ADD_INT(olist, id, o);
+		list_open();
+		printf("Hashcount before end: %d \n", HASH_COUNT(olist));
+		memset(successors, 0, sizeof(successors));
+		break;
+	}
 
     free(o);
+    printf("Finished :)");
 }
 
 int main() {
