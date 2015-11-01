@@ -114,12 +114,8 @@ void find_adj(int sy, int sx, int successors[]){
 
     int _id;
     int start_node;
+    struct Points *s_node = NULL;
     for(int i=0; i<8; i++){
-
-        struct open_list *o = NULL;
-        o = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
-        
-        struct Points *s_node = NULL;
         s_node = (struct Points*)malloc(sizeof(struct Points));
 
         _id = 0;
@@ -191,7 +187,6 @@ void find_adj(int sy, int sx, int successors[]){
             break;
         }
     }
-
    // HASH_FIND_INT( point, &star_node, s );
 }
 
@@ -231,7 +226,7 @@ int find_lowest(){
     for(s=olist; s != NULL; s=(OPEN_LIST*)(s->hh.next)) {
         //printf("S %d\n", &s->hh.next);
         int cur = manhatten(s->p->y, s->p->x, END_NODE/10, END_NODE%10);
-        printf("Node: x:%d y:%d - distance: %d\n", s->p->y, s->p->x, cur);
+        //printf("Node: x:%d y:%d - distance: %d\n", s->p->y, s->p->x, cur);
         if (cur < lowest){
         	lowest = cur;
         	_id = (10*s->p->y)+s->p->x;
@@ -248,6 +243,7 @@ int find_lowest(){
 
 void search(int sy, int sx, int dy, int dx) {
     int lowest = 0;
+    int finished = 0;
     int start_node = (10*sy)+sx;
     struct Points *s_node = NULL;
 
@@ -268,8 +264,8 @@ void search(int sy, int sx, int dy, int dx) {
     HASH_ADD_INT(olist, id, o);
 
     int successors[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-    
-    while(HASH_COUNT(olist) > 0){
+    struct open_list *tmp = NULL;
+    while(HASH_COUNT(olist) > 0 && finished == 0){
     	lowest = find_lowest();
     	s_node = find_node(lowest);
     	
@@ -285,24 +281,31 @@ void search(int sy, int sx, int dy, int dx) {
 
 	    for(int i=0; i<8; i++){
 	    	s_node = find_node(successors[i]);
-	    	if ((10*s_node->y)+s_node->x == END_NODE)
+	    	if(!s_node)
+	    		continue;
+	    	if ((10*s_node->y)+s_node->x == END_NODE){
+	    		printf("WE ARE HERE\n");
+	    		finished = 1;
 	    		break;
-	        printf("Inner loop: y:%d x:%d\n", s_node->y, s_node->x);
-	        o->id = s_node->id;
-    		o->p = s_node;
-    		o->p->fcost = 0;
-    		HASH_ADD_INT(olist, id, o);
+	    	}
+	        //printf("Inner loop: y:%d x:%d\n", s_node->y, s_node->x);
+	        tmp = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
+	        tmp->id = s_node->id;
+    		tmp->p = s_node;
+    		tmp->p->fcost = 0;
+    		HASH_ADD_INT(olist, id, tmp);
 	    }
 	    //c->id = s_node->id
 
 		//HASH_ADD_INT(olist, id, o);
-		list_open();
+		//list_open();
 		printf("Hashcount before end: %d \n", HASH_COUNT(olist));
 		memset(successors, 0, sizeof(successors));
-		break;
 	}
-
     free(o);
+    free(c);
+    free(s_node);
+    free(tmp);
     printf("Finished :)");
 }
 
