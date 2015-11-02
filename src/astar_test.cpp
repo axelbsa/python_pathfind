@@ -8,15 +8,42 @@ int items_added = 0;
 int mapWidth = 10;
 int mapHeight = 10;
 
+int world_map[ 20 * 20 ] = 
+{
+
+// 0001020304050607080910111213141516171819
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,   // 00
+	1,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,1,   // 01
+	1,9,9,1,1,9,9,9,1,9,1,9,1,9,1,9,9,9,1,1,   // 02
+	1,9,9,1,1,9,9,9,1,9,1,9,1,9,1,9,9,9,1,1,   // 03
+	1,9,1,1,1,1,9,9,1,9,1,9,1,1,1,1,9,9,1,1,   // 04
+	1,9,1,1,9,1,1,1,1,9,1,1,1,1,9,1,1,1,1,1,   // 05
+	1,9,9,9,9,1,1,1,1,1,1,9,9,9,9,1,1,1,1,1,   // 06
+	1,9,9,9,9,9,9,9,9,1,1,1,9,9,9,9,9,9,9,1,   // 07
+	1,9,1,1,1,1,1,1,1,1,1,9,1,1,1,1,1,1,1,1,   // 08
+	1,9,1,9,9,9,9,9,9,9,1,1,9,9,9,9,9,9,9,1,   // 09
+	1,9,1,1,1,1,9,1,1,9,1,1,1,1,1,1,1,1,1,1,   // 10
+	1,9,9,9,9,9,1,9,1,9,1,9,9,9,9,9,1,1,1,1,   // 11
+	1,9,1,9,1,9,9,9,1,9,1,9,1,9,1,9,9,9,1,1,   // 12
+	1,9,1,9,1,9,9,9,1,9,1,9,1,9,1,9,9,9,1,1,   // 13
+	1,9,1,1,1,1,9,9,1,9,1,9,1,1,1,1,9,9,1,1,   // 14
+	1,9,1,1,9,1,1,1,1,9,1,1,1,1,9,1,1,1,1,1,   // 15
+	1,9,9,9,9,1,1,1,1,1,1,9,9,9,9,1,1,1,1,1,   // 16
+	1,1,9,9,9,9,9,9,9,1,1,1,9,9,9,1,9,9,9,9,   // 17
+	1,9,1,1,1,1,1,1,1,1,1,9,1,1,1,1,1,1,1,1,   // 18
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,   // 19
+
+};
+
 int path[10][10] = {
-    {0,0,0,0,0,0,1,1,1,1},
-    {0,0,1,1,1,0,1,1,1,1},
-    {0,1,1,1,1,0,1,1,1,1},
-    {0,1,1,1,1,0,1,1,1,1},
-    {0,0,0,0,1,0,1,1,1,1},
+    {1,1,1,1,1,1,1,1,1,1},
+    {1,0,0,0,0,0,1,1,1,1},
+    {1,0,1,1,1,0,1,1,1,1},
+    {1,0,1,1,1,0,1,1,1,1},
+    {1,0,0,0,1,0,1,1,1,1},
     {1,1,1,0,1,0,1,1,1,1},
     {1,1,0,0,1,0,1,1,1,1},
-    {1,1,0,1,0,0,0,0,1,1},
+    {1,1,0,0,0,0,0,0,1,1},
     {1,1,0,1,1,0,1,0,0,1},
     {1,1,0,0,0,0,1,0,0,0},
 };
@@ -125,69 +152,60 @@ void find_adj(int sy, int sx, int successors[]){
             case 0:
                 start_node = (10*sy)+sx+1;
                 s_node = find_node(start_node);
-                if(!s_node)
-                    break;
-                successors[i] = start_node;
+                if(s_node && path[sy][sx] == 0)
+                	successors[i] = start_node;
                 break;
 
             case 1:
                 start_node = (10*(sy+1))+sx;
                 s_node = find_node(start_node);
-                if(!s_node)
-                    break;
-                successors[i] = start_node;
+                if(s_node && path[sy][sx] == 0)
+                	successors[i] = start_node;
             break;
 
             case 2:
                 start_node = (10*sy)+sx-1;
                 s_node = find_node(start_node);
-                if(!s_node)
-                    break;
-                successors[i] = start_node;
+                if(s_node && path[sy][sx] == 0)
+                	successors[i] = start_node;
             break;
 
             case 3:
                 start_node = (10*(sy-1))+sx;
                 s_node = find_node(start_node);
-                if(!s_node)
-                    break;
-                successors[i] = start_node;
+                if(s_node && path[sy][sx] == 0)
+                	successors[i] = start_node;
             break;
 
             case 4:
                 start_node = (10*(sy-1))+sx+1;
                 s_node = find_node(start_node);
-                if(!s_node)
-                    break;
-                successors[i] = start_node;
+                if(s_node && path[sy][sx] == 0)
+                	successors[i] = start_node;
             break;
 
             case 5:
                 start_node = (10*(sy+1))+sx+1;
                 s_node = find_node(start_node);
-                if(!s_node)
-                    break;
-                successors[i] = start_node;
+                if(s_node && path[sy][sx] == 0)
+                	successors[i] = start_node;
             break;
 
             case 6:
                 start_node = (10*(sy+1))+sx-1;
                 s_node = find_node(start_node);
-                if(!s_node)
-                    break;
-                successors[i] = start_node;
+                if(s_node && path[sy][sx] == 0)
+                	successors[i] = start_node;
             break;
 
             case 7:
                 start_node = (10*(sy-1))+sx-1;
                 s_node = find_node(start_node);
-                if(!s_node)
-                    break;
-                successors[i] = start_node;
+                if(s_node && path[sy][sx] == 0)
+                	successors[i] = start_node;
             break;
         }
     }
-   // HASH_FIND_INT( point, &star_node, s );
 }
 
 void list_open(){
@@ -213,7 +231,7 @@ int manhatten(int sy, int sx, int dy, int dx) {
 }
 
 int find_lowest(){
-    int lowest = 99999;
+    int lowest = 999999999;
     int _id = 0;
     struct open_list *s, *tmp;
 
@@ -254,7 +272,6 @@ void search(int sy, int sx, int dy, int dx) {
 
     struct open_list *o = NULL;
     struct closed_list *c = NULL;
-    c = (CLOSED_LIST*)malloc(sizeof(CLOSED_LIST));
 
     int _id = s_node->id;
     o = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
@@ -263,7 +280,7 @@ void search(int sy, int sx, int dy, int dx) {
     o->p->fcost = 0;
     HASH_ADD_INT(olist, id, o);
 
-    int successors[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    int successors[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
     struct open_list *tmp = NULL;
     while(HASH_COUNT(olist) > 0 && finished == 0){
     	lowest = find_lowest();
@@ -280,6 +297,8 @@ void search(int sy, int sx, int dy, int dx) {
 	    printf("Lowest found was: %d\n", lowest);
 
 	    for(int i=0; i<8; i++){
+	    	if(successors[i] < 0)
+	    		continue;
 	    	s_node = find_node(successors[i]);
 	    	if(!s_node)
 	    		continue;
@@ -295,17 +314,20 @@ void search(int sy, int sx, int dy, int dx) {
     		tmp->p->fcost = 0;
     		HASH_ADD_INT(olist, id, tmp);
 	    }
-	    //c->id = s_node->id
-
-		//HASH_ADD_INT(olist, id, o);
+	    c = (CLOSED_LIST*)malloc(sizeof(CLOSED_LIST));
+	    c->id = s_node->id;
+	    c->p = s_node;
+	    HASH_ADD_INT(clist, id, c);
 		//list_open();
-		printf("Hashcount before end: %d \n", HASH_COUNT(olist));
-		memset(successors, 0, sizeof(successors));
+		//printf("Hashcount before end: %d \n", HASH_COUNT(olist));
+		memset(successors, -1, sizeof(successors));
 	}
+
     free(o);
     free(c);
     free(s_node);
     free(tmp);
+    
     printf("Finished :)");
 }
 
