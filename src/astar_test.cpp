@@ -208,10 +208,17 @@ void find_adj(int sy, int sx, int successors[]){
     }
 }
 
+void list_closed(){
+    struct closed_list *s;
+    for(s=clist; s != NULL; s=(CLOSED_LIST*)(s->hh.next)) {
+    	printf("Node: x:%d y:%d \n", s->p->y, s->p->x);
+    }
+}
+
 void list_open(){
-    struct open_list *s, *tmp;
+    struct open_list *s;
     for(s=olist; s != NULL; s=(OPEN_LIST*)(s->hh.next)) {
-    	printf("Node: x:%d y:%d - distance: %d\n", s->p->y, s->p->x);
+    	printf("Node: x:%d y:%d\n", s->p->y, s->p->x);
     }
 }
 
@@ -323,6 +330,8 @@ void search(int sy, int sx, int dy, int dx) {
 		memset(successors, -1, sizeof(successors));
 	}
 
+	list_closed();
+    
     free(o);
     free(c);
     free(s_node);
