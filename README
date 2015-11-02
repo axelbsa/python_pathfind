@@ -1,0 +1,10 @@
+
+
+need python.h
+
+apt-get install python-dev
+
+or python-devel for fedora 
+
+
+compile with: python setup.py build_ext -i
