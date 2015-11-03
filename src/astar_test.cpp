@@ -3,6 +3,8 @@
 #include <memory>
 #include "uthash.h"
 
+#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+
 bool first = false;
 int items_added = 0;
 
@@ -99,6 +101,9 @@ struct Points *add_node(int _id, int x, int y, struct Points *parent) {
 
     HASH_ADD_INT(point, id, p);  /* id: name of key field */
     //printf("Adding nodeid:%d\n", _id);
+
+    heap_add(p);
+
     return p;
 }
 
@@ -156,56 +161,56 @@ void find_adj(int sy, int sx, int successors[]){
             case 0:
                 start_node = (10*sy)+sx+1;
                 s_node = find_node(start_node);
-                if(s_node && path[sy][sx] == 0)
+                if(s_node)
                 	successors[i] = start_node;
                 break;
 
             case 1:
                 start_node = (10*(sy+1))+sx;
                 s_node = find_node(start_node);
-                if(s_node && path[sy][sx] == 0)
+                if(s_node)
                 	successors[i] = start_node;
             break;
 
             case 2:
                 start_node = (10*sy)+sx-1;
                 s_node = find_node(start_node);
-                if(s_node && path[sy][sx] == 0)
+                if(s_node)
                 	successors[i] = start_node;
             break;
 
             case 3:
                 start_node = (10*(sy-1))+sx;
                 s_node = find_node(start_node);
-                if(s_node && path[sy][sx] == 0)
+                if(s_node)
                 	successors[i] = start_node;
             break;
 
             case 4:
                 start_node = (10*(sy-1))+sx+1;
                 s_node = find_node(start_node);
-                if(s_node && path[sy][sx] == 0)
+                if(s_node)
                 	successors[i] = start_node;
             break;
 
             case 5:
                 start_node = (10*(sy+1))+sx+1;
                 s_node = find_node(start_node);
-                if(s_node && path[sy][sx] == 0)
+                if(s_node)
                 	successors[i] = start_node;
             break;
 
             case 6:
                 start_node = (10*(sy+1))+sx-1;
                 s_node = find_node(start_node);
-                if(s_node && path[sy][sx] == 0)
+                if(s_node)
                 	successors[i] = start_node;
             break;
 
             case 7:
                 start_node = (10*(sy-1))+sx-1;
                 s_node = find_node(start_node);
-                if(s_node && path[sy][sx] == 0)
+                if(s_node)
                 	successors[i] = start_node;
             break;
         }
@@ -239,6 +244,13 @@ int manhatten(int sy, int sx, int dy, int dx) {
     int tx = abs(sx - dx);
     int ty = abs(sy - dy);
     return (2 * (tx + ty));
+}
+
+float chebyshev(int sy, int sx, int dy, int dx ) {
+    float D = 1.070;
+    int tx = abs(sx - dx);
+    int ty = abs(sy - dx);
+    return D * (tx + ty) + (D*2 - 2 * D) * MIN(tx, ty);
 }
 
 int find_lowest(){
@@ -282,7 +294,7 @@ void search(int sy, int sx, int dy, int dx) {
 
     int successors[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
     struct open_list *tmp = NULL;
-    while(HASH_COUNT(olist) > 0 && finished == 0){
+    while(heap_count() > 0 && finished == 0){
     	lowest = find_lowest();
     	s_node = find_node(lowest);
     	
@@ -331,6 +343,7 @@ void search(int sy, int sx, int dy, int dx) {
     free(c);
     free(s_node);
     free(tmp);
+    heap_destroy();
     
     printf("Finished :)\n");
 }
