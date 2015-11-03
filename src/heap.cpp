@@ -1,5 +1,8 @@
 #include "common.h"
 #include <stdlib.h>
+#ifdef DEBUG
+#include <stdio.h>
+#endif
 
 // Holds the heap in memory
 static POINT** heap = NULL;
@@ -13,6 +16,7 @@ static size_t max_size = INIT_HEAP_SIZE;
 void heap_add(POINT *point) {
     if (heap == NULL) {
         heap = (POINT**) malloc(sizeof(POINT*) * max_size);
+        heap[0] = NULL;
     }
 
     // We're running out of space, increase heap size
@@ -49,9 +53,9 @@ static void percolateDown(size_t hole) {
         } else {
             break;
         }
-
-        heap[hole] = temp;
     }
+
+    heap[hole] = temp;
 }
 
 POINT* heap_del() {
@@ -80,7 +84,6 @@ void heap_destroy() {
 
 
 #ifdef DEBUG
-#include <stdio.h>
 
 int main(void) {
     int i;
