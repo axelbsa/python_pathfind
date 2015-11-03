@@ -91,7 +91,7 @@ int main(void) {
     for (i = 0; i < 10; ++i) {
         POINT* p = (POINT*) malloc(sizeof(POINT));
         p->id = i;
-        p->fcost = i;
+        p->fcost = rand() % 266;
 
         open_add(p);
     }

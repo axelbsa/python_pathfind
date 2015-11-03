@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <math.h>
-#include "uthash.h"
 #include "common.h"
+#include "uthash.h"
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 
@@ -64,26 +64,30 @@ int allow_diagonal = 0;
 
 struct Points *add_node(int _id, int x, int y, struct Points *parent) {
 
-    struct Points *p = NULL;
-    p = (POINT*)malloc(sizeof(POINT));
-    p->id = _id;
-    p->x = x;
-    p->y = y;
+    //struct Points *p = NULL;
+    //p = (POINT*)malloc(sizeof(POINT));
+    //p->id = _id;
+    //p->x = x;
+    //p->y = y;
 
-    if(parent)
-        p->parent = parent;
+    //if(parent)
+        //p->parent = parent;
 
-    HASH_ADD_INT(point, id, p);  /* id: name of key field */
+    //HASH_ADD_INT(point, id, p);  /* id: name of key field */
     //printf("Adding nodeid:%d\n", _id);
 
-    heap_add(p);
+    POINT p;
+    p.id = _id;
+    p.x = x;
+    p.y = y;
+    points_add(&p);
 
     return p;
 }
 
 struct Points *find_node(int _id) {
     struct Points *s;
-    HASH_FIND_INT( point, &_id, s );  
+    //HASH_FIND_INT( point, &_id, s );  
     return s;
 }
 
@@ -191,28 +195,28 @@ void find_adj(int sy, int sx, int successors[]){
     }
 }
 
-void list_closed(){
-    struct closed_list *s;
-    for(s=clist; s != NULL; s=(CLOSED_LIST*)(s->hh.next)) {
-    	printf("Node: x:%d y:%d \n", s->p->y, s->p->x);
-    }
-}
+//void list_closed(){
+    //struct closed_list *s;
+    //for(s=clist; s != NULL; s=(CLOSED_LIST*)(s->hh.next)) {
+        //printf("Node: x:%d y:%d \n", s->p->y, s->p->x);
+    //}
+//}
 
-void list_open(){
-    struct open_list *s;
-    for(s=olist; s != NULL; s=(OPEN_LIST*)(s->hh.next)) {
-    	printf("Node: x:%d y:%d\n", s->p->y, s->p->x);
-    }
-}
+//void list_open(){
+    //struct open_list *s;
+    //for(s=olist; s != NULL; s=(OPEN_LIST*)(s->hh.next)) {
+        //printf("Node: x:%d y:%d\n", s->p->y, s->p->x);
+    //}
+//}
 
-void list_points(){
-    struct Points *s;
+//void list_points(){
+    //struct Points *s;
 
-    for(s=point; s != NULL; s=(struct Points*)(s->hh.next)) {
-        printf("S %d\n", &s->hh.next);
-        printf("Node: id %d: x:%d y:%d\n", s->id, s->x, s->y);
-    }
-}
+    //for(s=point; s != NULL; s=(struct Points*)(s->hh.next)) {
+        //printf("S %d\n", &s->hh.next);
+        //printf("Node: id %d: x:%d y:%d\n", s->id, s->x, s->y);
+    //}
+//}
 
 int manhatten(int sy, int sx, int dy, int dx) {
     int tx = abs(sx - dx);
@@ -232,15 +236,15 @@ int find_lowest(){
     int _id = 0;
     struct open_list *s, *tmp;
 
-    for(s=olist; s != NULL; s=(OPEN_LIST*)(s->hh.next)) {
-        //printf("S %d\n", &s->hh.next);
-        int cur = manhatten(s->p->y, s->p->x, END_NODE/10, END_NODE%10);
-        //printf("Node: x:%d y:%d - distance: %d\n", s->p->y, s->p->x, cur);
-        if (cur < lowest){
-        	lowest = cur;
-        	_id = (10*s->p->y)+s->p->x;
-        }
-    }
+    //for(s=olist; s != NULL; s=(OPEN_LIST*)(s->hh.next)) {
+        ////printf("S %d\n", &s->hh.next);
+        //int cur = manhatten(s->p->y, s->p->x, END_NODE/10, END_NODE%10);
+        ////printf("Node: x:%d y:%d - distance: %d\n", s->p->y, s->p->x, cur);
+        //if (cur < lowest){
+            //lowest = cur;
+            //_id = (10*s->p->y)+s->p->x;
+        //}
+    //}
 
     return _id;
 }
@@ -264,11 +268,13 @@ void search(int sy, int sx, int dy, int dx) {
     o->id = _id;
     o->p = s_node;
     o->p->fcost = 0;
-    HASH_ADD_INT(olist, id, o);
-
+    //HASH_ADD_INT(olist, id, o);
+    
+    heap_add();
+    
     int successors[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
     struct open_list *tmp = NULL;
-    while(heap_size() > 0 && finished == 0){
+    while(open_size() > 0 && finished == 0){
     	lowest = find_lowest();
     	s_node = find_node(lowest);
     	
@@ -276,8 +282,8 @@ void search(int sy, int sx, int dy, int dx) {
     	int gcost = s_node->gcost;
 
     	struct open_list *del = (OPEN_LIST*)malloc(sizeof(OPEN_LIST));
-    	HASH_FIND_INT( olist, &s_node->id, del );
-    	HASH_DEL(olist, del);
+    	//HASH_FIND_INT( olist, &s_node->id, del );
+    	//HASH_DEL(olist, del);
 	    
 	    find_adj(s_node->y, s_node->x, successors);	    
 	    printf("Lowest found was: %d\n", lowest);
@@ -302,17 +308,17 @@ void search(int sy, int sx, int dy, int dx) {
 	        tmp->id = s_node->id;
     		tmp->p = s_node;
     		tmp->p->fcost = 0;
-    		HASH_ADD_INT(olist, id, tmp);
+    		//HASH_ADD_INT(olist, id, tmp);
 	    }
 	    c = (CLOSED_LIST*)malloc(sizeof(CLOSED_LIST));
 	    c->id = s_node->id;
 	    c->p = s_node;
-	    HASH_ADD_INT(clist, id, c);
+	    //HASH_ADD_INT(clist, id, c);
 		//list_open();
 		//printf("Hashcount before end: %d \n", HASH_COUNT(olist));
 		memset(successors, -1, sizeof(successors));
 	}
-	list_closed();
+	//list_closed();
     free(o);
     free(c);
     free(s_node);
