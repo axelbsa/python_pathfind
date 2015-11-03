@@ -20,7 +20,7 @@ typedef struct Points POINT;
 
 void points_add(POINT* point);
 
-POINT * points_find(int x, int y);
+POINT * points_find(int id);
 
 void points_destroy();
 
