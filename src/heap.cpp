@@ -80,7 +80,7 @@ void heap_destroy() {
 
 
 #ifdef DEBUG
-
+#include <stdio.h>
 
 int path[10][10] = {
     {1,1,1,1,1,1,1,1,1,1},
@@ -102,6 +102,7 @@ struct Points *add_node(int _id, int x, int y, struct Points *parent) {
     p->id = _id;
     p->x = x;
     p->y = y;
+    p->fcost = rand() % 20;
 
     if(parent)
         p->parent = parent;
@@ -129,14 +130,18 @@ void add_items(int sy=0, int sx=0, int dy=0, int dx=0) {
         	}
 
             parent = add_node((i*10)+j, j, i, parent);
-            items_added++;
         }
         printf("\n");
     }
 }
 
 int main(void) {
-    add_node(0, 0, 9, 9);
+    add_items(0, 0, 9, 9);
+
+    while (heap_size() != 0) {
+        POINT* p = heap_del();
+        printf("%d %d\n", p->id, p->fcost);
+    }
     return 0;
 }
 
