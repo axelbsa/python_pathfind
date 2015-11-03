@@ -16,25 +16,29 @@ struct Points {
 };
 typedef struct Points POINT;
 
-struct open_list {
-    int id;
-    POINT *p;
-};
-typedef struct open_list OPEN_LIST;
-
-struct closed_list {
-    int id;
-    POINT *p;
-};
-typedef struct closed_list CLOSED_LIST;
 
 
-void heap_add(POINT *point);
+void points_add(POINT* point);
 
-POINT * heap_del();
+POINT * points_find(int x, int y);
 
-size_t heap_size();
+void points_destroy();
 
-void heap_destroy();
+
+
+void open_add(POINT *point);
+
+POINT * open_del();
+
+size_t open_size();
+
+void open_destroy();
+
+
+
+void closed_add(POINT* point);
+
+void closed_destroy();
+
 
 #endif // FOO_H_

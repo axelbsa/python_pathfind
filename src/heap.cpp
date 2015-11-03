@@ -13,7 +13,7 @@ static size_t size = 0;
 // Maximum heap size
 static size_t max_size = INIT_HEAP_SIZE;
 
-void heap_add(POINT *point) {
+void open_add(POINT *point) {
     if (heap == NULL) {
         heap = (POINT**) malloc(sizeof(POINT*) * max_size);
         heap[0] = NULL;
@@ -58,7 +58,7 @@ static void percolateDown(size_t hole) {
     heap[hole] = temp;
 }
 
-POINT* heap_del() {
+POINT* open_del() {
     if (size == 0) {
         return NULL;
     }
@@ -72,11 +72,11 @@ POINT* heap_del() {
     return min;
 }
 
-size_t heap_size() {
+size_t open_size() {
     return size;
 }
 
-void heap_destroy() {
+void open_destroy() {
     free(heap);
     heap = NULL;
 }
@@ -93,11 +93,11 @@ int main(void) {
         p->id = i;
         p->fcost = i;
 
-        heap_add(p);
+        open_add(p);
     }
 
-    while (heap_size() != 0) {
-        POINT* p = heap_del();
+    while (open_size() != 0) {
+        POINT* p = open_del();
         printf("%d %d\n", p->id, p->fcost);
         free(p);
     }
