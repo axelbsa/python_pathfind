@@ -1,5 +1,6 @@
 #include "common.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 // Our "all points" list
 static POINT** points = NULL;
@@ -20,10 +21,9 @@ static size_t closed_size_max = INIT_HEAP_SIZE;
 // TODO: Implement insertion sort instead
 static void sort(POINT** list, size_t size) {
     size_t i;
-
     do {
         for (i = 1; i < size; ++i) {
-            if (list[i-1]->id < list[i]->id) {
+            if (list[i]->id < list[i-1]->id) {
                 POINT* tmp = list[i-1];
                 list[i-1] = list[i];
                 list[i] = tmp;
@@ -33,45 +33,40 @@ static void sort(POINT** list, size_t size) {
     } while (i != size);
 }
 
+// TODO: Implement binary search
 static POINT* search(POINT** list, size_t size, int id) {
-    size_t i;
-
-    for (i = size / 2; i > 0 && i < size;) {
-        if (id < list[i]->id) {
-            i /= 2;
-        } else if (id > list[i]->id) {
-            i += i / 2;
-        } else {
+    for (size_t i = 0; i < size; ++i) {
+        if (list[i]->id == id) {
             return list[i];
         }
     }
 
-    return id == list[0]->id ? list[0] : NULL;
+    return NULL;
 }
 
-void points_add(POINT* point) {
-    POINT* i_node = (POINT*) malloc(sizeof(POINT));
-    *i_node = *point;
-
+POINT* points_add(POINT* point) {
     if (points == NULL) {
         points = (POINT**) malloc(sizeof(POINT*) * points_size_max);
     }
 
-    if (points_size == points_max_size - 1) {
+    if (points_size == points_size_max - 1) {
         points_size_max = points_size_max * 2;
         points = (POINT**) realloc((void*) points, sizeof(POINT*) * points_size_max);
     }
 
-    points[size++] = i_node;
-    sort(points, size);
+    points[points_size] = (POINT*) malloc(sizeof(POINT)); 
+    *points[points_size] = *point;
+    ++points_size;
+    sort(points, points_size);
+    return points[points_size-1];
 }
 
 POINT* points_find(int id) {
-    return search(points, size, id);
+    return search(points, points_size, id);
 }
 
 void points_destroy() {
-    for (size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < points_size; ++i) {
         free(points[i]);
     }
     free(points);
@@ -83,12 +78,12 @@ void closed_add(POINT* point) {
         closed = (POINT**) malloc(sizeof(POINT*) * points_size_max);
     }
 
-    if (closed_size == closed_max_size - 1) {
+    if (closed_size == closed_size_max - 1) {
         closed_size_max *= 2;
         closed = (POINT**) realloc((void*) closed, sizeof(POINT*) * closed_size_max);
     }
 
-    closed[size++] = point;
+    closed[closed_size++] = point;
 }
 
 void closed_destroy() {
