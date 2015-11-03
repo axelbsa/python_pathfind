@@ -22,8 +22,8 @@ void heap_add(POINT *point) {
     }
     
     // Percolate up
-    int hole = ++size;
-    for( ; hole > 1 && point->fcost < heap[hole / 2]->fcost; hole /= 2) {
+    size_t hole = ++size;
+    for(; hole > 1 && point->fcost < heap[hole / 2]->fcost; hole /= 2) {
         heap[hole] = heap[hole / 2];
     }
 
@@ -31,8 +31,8 @@ void heap_add(POINT *point) {
     heap[hole] = point;
 }
 
-static void percolateDown(int hole) {
-    int child;
+static void percolateDown(size_t hole) {
+    size_t child;
     POINT* temp = heap[hole];
 
     for (; hole * 2 <= size; hole = child) {
@@ -82,66 +82,23 @@ void heap_destroy() {
 #ifdef DEBUG
 #include <stdio.h>
 
-int path[10][10] = {
-    {1,1,1,1,1,1,1,1,1,1},
-    {1,0,0,0,0,0,1,1,1,1},
-    {1,0,1,1,1,0,1,1,1,1},
-    {1,0,1,1,1,0,1,1,1,1},
-    {1,0,0,0,1,0,1,1,1,1},
-    {1,1,1,0,1,0,1,1,1,1},
-    {1,1,0,0,1,0,1,1,1,1},
-    {1,1,0,0,0,0,0,0,1,1},
-    {1,1,0,1,1,0,1,0,0,1},
-    {1,1,0,0,0,0,1,0,0,0},
-};
-
-struct Points *add_node(int _id, int x, int y, struct Points *parent) {
-
-    struct Points *p = NULL;
-    p = (POINT*)malloc(sizeof(POINT));
-    p->id = _id;
-    p->x = x;
-    p->y = y;
-    p->fcost = rand() % 20;
-
-    if(parent)
-        p->parent = parent;
-
-    //printf("Adding nodeid:%d\n", _id);
-    heap_add(p);
-    return p;
-}
-
-void add_items(int sy=0, int sx=0, int dy=0, int dx=0) {
-	int START_NODE = (10*sy) + sx;
-	int END_NODE = (10*dy) + dx; 
-    struct Points *parent = NULL;
-    int i,j;
-    for(i=0; i<10; i++){
-        for(j=0; j<10; j++){
-        	int c_node = (i*10)+j;
-        	
-        	if (c_node == START_NODE){
-				printf("S ");
-        	}else if(c_node == END_NODE){
-				printf("E ");
-        	}else{
-            	printf("%i ", path[i][j]);
-        	}
-
-            parent = add_node((i*10)+j, j, i, parent);
-        }
-        printf("\n");
-    }
-}
-
 int main(void) {
-    add_items(0, 0, 9, 9);
+    int i;
+
+    for (i = 0; i < 10; ++i) {
+        POINT* p = (POINT*) malloc(sizeof(POINT));
+        p->id = i;
+        p->fcost = i;
+
+        heap_add(p);
+    }
 
     while (heap_size() != 0) {
         POINT* p = heap_del();
         printf("%d %d\n", p->id, p->fcost);
+        free(p);
     }
+
     return 0;
 }
 
