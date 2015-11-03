@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "uthash.h"
+#include "common.h"
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 
@@ -267,7 +268,7 @@ void search(int sy, int sx, int dy, int dx) {
 
     int successors[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
     struct open_list *tmp = NULL;
-    while(heap_count() > 0 && finished == 0){
+    while(heap_size() > 0 && finished == 0){
     	lowest = find_lowest();
     	s_node = find_node(lowest);
     	
