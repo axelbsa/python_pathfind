@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <math.h>
-#include <memory>
 #include "uthash.h"
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
@@ -52,32 +51,6 @@ int path[10][10] = {
     {1,1,0,0,0,0,1,0,0,0},
 };
 
-struct Points {
-    int x;
-    int y;
-    int id;
-    int fcost;
-    int hcost;
-    int gcost;
-    struct Points *parent;
-    UT_hash_handle hh;
-};
-
-struct open_list {
-    int id;
-    struct Points *p;
-    UT_hash_handle hh;
-};
-
-struct closed_list {
-    int id;
-    struct Points *p;
-    UT_hash_handle hh;
-};
-
-typedef struct open_list OPEN_LIST;
-typedef struct closed_list CLOSED_LIST;
-typedef struct Points POINT;
 
 struct Points *point = NULL;
 struct open_list *olist = NULL;
