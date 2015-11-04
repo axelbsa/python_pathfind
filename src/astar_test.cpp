@@ -179,7 +179,7 @@ int manhatten(int sy, int sx, int dy, int dx) {
 }
 
 float chebyshev(int sy, int sx, int dy, int dx ) {
-    float D = 1.4;
+    float D = 14;
     int tx = abs(sx - dx);
     int ty = abs(sy - dy);
     return D * (tx + ty) + (D*2 - 2 * D) * MIN(tx, ty);
@@ -200,6 +200,12 @@ void search(int sy, int sx, int dy, int dx) {
     while(open_size() > 0 && finished == 0){
     	
         POINT* p = open_del();
+        if (( 10 * p->y ) + p->x == END_NODE ){
+            printf("WE ARE HERE\n");
+            finished = 1;
+            break;
+        }
+
 	    find_adj(p->y, p->x, successors);	    
 	    printf("Lowest found was: %d\n", (10*p->y)+p->x);
        
@@ -219,18 +225,13 @@ void search(int sy, int sx, int dy, int dx) {
 
             int sx = successor->x;
             int sy = successor->y;
-            successor->gcost++;
-            successor->fcost = chebyshev(sy, sx, dy, dx) + successor->gcost;
-
-	    	if (( 10 * successor->y ) + successor->x == END_NODE ){
-	    		printf("WE ARE HERE\n");
-	    		finished = 1;
-	    		break;
-	    	}
+            successor->gcost += 10;
+            successor->fcost = manhatten(sy, sx, dy, dx) + successor->gcost;
+            successor->parent = p;
+            //printf("Fcost=%d for node=%d%d\n", successor->fcost, sy, sx);
 
             open_add(successor);
 	    }
-        fprintf(stderr, "im in ur looopz\n");
         closed_add(p);
 		memset(successors, -1, sizeof(successors));
 	}
