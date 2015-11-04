@@ -71,22 +71,22 @@ POINT* add_node(int _id, int x, int y, POINT* parent) {
 }
 
 void add_items(int sy=0, int sx=0, int dy=0, int dx=0) {
-	START_NODE = (10 * sy) + sx;
-	END_NODE = (10 * dy) + dx; 
+    START_NODE = (10 * sy) + sx;
+    END_NODE = (10 * dy) + dx; 
     POINT *parent = NULL;
     int i,j;
     for(i = 0; i < mapHeight; i++){
         for(j = 0; j < mapWidth; j++){
 
-        	int c_node = ( i * 10 ) + j;
+            int c_node = ( i * 10 ) + j;
 
-        	if (c_node == START_NODE){
-				printf("S ");
-        	}else if(c_node == END_NODE){
-				printf("E ");
-        	}else{
-            	printf("%i ", path[i][j]);
-        	}
+            if (c_node == START_NODE){
+                printf("S ");
+            }else if(c_node == END_NODE){
+                printf("E ");
+            }else{
+                printf("%i ", path[i][j]);
+            }
 
             parent = add_node(( i * 10 ) + j, j, i, parent);
             items_added++;
@@ -117,56 +117,56 @@ void find_adj(int sy, int sx, int* successors){
                 start_node = (10*sy)+sx+1;
                 s_node = points_find(start_node);
                 if(s_node)
-                	successors[i] = start_node;
+                    successors[i] = start_node;
                 break;
 
             case 1:
                 start_node = (10*(sy+1))+sx;
                 s_node = points_find(start_node);
                 if(s_node)
-                	successors[i] = start_node;
+                    successors[i] = start_node;
             break;
 
             case 2:
                 start_node = (10*sy)+sx-1;
                 s_node = points_find(start_node);
                 if(s_node)
-                	successors[i] = start_node;
+                    successors[i] = start_node;
             break;
 
             case 3:
                 start_node = (10*(sy-1))+sx;
                 s_node = points_find(start_node);
                 if(s_node)
-                	successors[i] = start_node;
+                    successors[i] = start_node;
             break;
 
             case 4:
                 start_node = (10*(sy-1))+sx+1;
                 s_node = points_find(start_node);
                 if(s_node)
-                	successors[i] = start_node;
+                    successors[i] = start_node;
             break;
 
             case 5:
                 start_node = (10*(sy+1))+sx+1;
                 s_node = points_find(start_node);
                 if(s_node)
-                	successors[i] = start_node;
+                    successors[i] = start_node;
             break;
 
             case 6:
                 start_node = (10*(sy+1))+sx-1;
                 s_node = points_find(start_node);
                 if(s_node)
-                	successors[i] = start_node;
+                    successors[i] = start_node;
             break;
 
             case 7:
                 start_node = (10*(sy-1))+sx-1;
                 s_node = points_find(start_node);
                 if(s_node)
-                	successors[i] = start_node;
+                    successors[i] = start_node;
             break;
         }
     }
@@ -185,7 +185,6 @@ float chebyshev(int sy, int sx, int dy, int dx ) {
     return D * (tx + ty) + (D*2 - 2 * D) * MIN(tx, ty);
 }
 
-
 void search(int sy, int sx, int dy, int dx) {
     int lowest = 0;
     int finished = 0;
@@ -194,11 +193,11 @@ void search(int sy, int sx, int dy, int dx) {
 
     POINT* s_node = points_find(start_node);
     printf("im searching\n");
-    
+
     open_add(s_node);
     int successors[] = {-1, -1, -1, -1, -1, -1, -1, -1};
     while(open_size() > 0 && finished == 0){
-    	
+
         POINT* p = open_del();
         if (( 10 * p->y ) + p->x == END_NODE ){
             printf("WE ARE HERE\n");
@@ -206,22 +205,22 @@ void search(int sy, int sx, int dy, int dx) {
             break;
         }
 
-	    find_adj(p->y, p->x, successors);	    
-	    printf("Lowest found was: %d\n", (10*p->y)+p->x);
-       
+        find_adj(p->y, p->x, successors);
+        printf("Lowest found was: %d\n", (10*p->y)+p->x);
+
         int successor_count = 4;
         if (ALLOW_DIAGONAL)
             successor_count = 8;
 
-	    for(int i=0; i < successor_count; i++){
-	    	if(successors[i] < 0)
-	    		continue;
+        for(int i=0; i < successor_count; i++){
+            if(successors[i] < 0)
+                continue;
 
             POINT* successor;
-	    	successor = points_find(successors[i]);
+            successor = points_find(successors[i]);
 
-	    	if(!successor)
-	    		continue;
+            if(!successor)
+                continue;
 
             int sx = successor->x;
             int sy = successor->y;
@@ -231,10 +230,10 @@ void search(int sy, int sx, int dy, int dx) {
             //printf("Fcost=%d for node=%d%d\n", successor->fcost, sy, sx);
 
             open_add(successor);
-	    }
+        }
         closed_add(p);
-		memset(successors, -1, sizeof(successors));
-	}
+        memset(successors, -1, sizeof(successors));
+    }
     open_destroy();
     printf("Finished :)\n");
 }
