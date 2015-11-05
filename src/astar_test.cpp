@@ -39,6 +39,7 @@ int mapHeight = 10;
 
 //};
 
+int lut[] = {1, 9999};
 int path[10][10] = {
     {1,1,1,1,1,1,1,1,1,1},
     {1,0,0,0,0,0,1,1,1,1},
@@ -47,9 +48,9 @@ int path[10][10] = {
     {1,0,0,0,1,0,1,1,1,1},
     {1,1,1,0,1,0,1,1,1,1},
     {1,1,0,0,1,0,1,1,1,1},
-    {1,1,0,0,0,0,0,0,1,1},
+    {1,1,0,0,0,1,1,0,1,1},
     {1,1,0,1,1,0,1,0,0,1},
-    {1,1,0,0,0,0,1,0,0,0},
+    {1,1,0,0,0,0,0,0,0,0},
 };
 
 int START_NODE = 0;
@@ -224,10 +225,12 @@ void search(int sy, int sx, int dy, int dx) {
 
             int sx = successor->x;
             int sy = successor->y;
-            successor->gcost += 10;
+            int gcost = successor->gcost;
+            gcost += 10 * lut[path[sy][sx]];
+            successor->gcost = gcost;
             successor->fcost = manhatten(sy, sx, dy, dx) + successor->gcost;
             successor->parent = p;
-            //printf("Fcost=%d for node=%d%d\n", successor->fcost, sy, sx);
+            //printf("\tFcost=%d for node=%d%d\n", successor->fcost, sy, sx);
 
             open_add(successor);
         }
@@ -239,8 +242,8 @@ void search(int sy, int sx, int dy, int dx) {
 }
 
 int main() {
-    add_items(8,8,1,2);
-    search(8,8,1,2);
+    add_items(1,1,8,8);
+    search(1,1,8,8);
     points_destroy();
     return 0;
 }
