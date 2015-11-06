@@ -1,7 +1,7 @@
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include "common.h"
-#include "uthash.h"
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 
@@ -10,6 +10,9 @@ int items_added = 0;
 
 int mapWidth = 10;
 int mapHeight = 10;
+
+int closed_size = 0;
+POINT* closed_list[200000];
 
 // A Bigger map for later testing
 //int world_map[ 20 * 20 ] = 
@@ -46,9 +49,9 @@ int path[10][10] = {
     {1,0,1,1,1,0,1,1,1,1},
     {1,0,1,1,1,0,1,1,1,1},
     {1,0,0,0,1,0,1,1,1,1},
-    {1,1,1,0,1,0,1,1,1,1},
-    {1,1,0,0,1,0,1,1,1,1},
-    {1,1,0,0,0,1,1,0,1,1},
+    {1,1,1,0,1,0,0,0,1,1},
+    {1,1,0,0,1,0,1,0,1,1},
+    {1,1,0,0,0,1,1,1,1,1},
     {1,1,0,1,1,0,1,0,0,1},
     {1,1,0,0,0,0,0,0,0,0},
 };
@@ -66,8 +69,7 @@ POINT* add_node(int _id, int x, int y, POINT* parent) {
     p.fcost = 0;
     p.hcost = 0;
     p.gcost = 0;
-    p.parent = parent;
-
+    p.parent = 0;
     return points_add(&p);
 }
 
@@ -186,6 +188,19 @@ float chebyshev(int sy, int sx, int dy, int dx ) {
     return D * (tx + ty) + (D*2 - 2 * D) * MIN(tx, ty);
 }
 
+void create_path(int id){
+
+    POINT* p = points_find(START_NODE);
+    while(p){
+        int sy = p->y;
+        int sx = p->x;
+        printf("Testing %d%d parent=%d\n", sy,sx, p->parent->id);
+        if((10*sy)+sx == END_NODE)
+            break;
+        p = p->parent;
+    };
+}
+
 void search(int sy, int sx, int dy, int dx) {
     int lowest = 0;
     int finished = 0;
@@ -200,23 +215,14 @@ void search(int sy, int sx, int dy, int dx) {
     while(open_size() > 0 && finished == 0){
 
         POINT* p = open_del();
-        if (( 10 * p->y ) + p->x == END_NODE ){
-            printf("WE ARE HERE\n");
-            finished = 1;
-            break;
-        }
 
         find_adj(p->y, p->x, successors);
-        printf("Lowest found was: %d\n", (10*p->y)+p->x);
 
         int successor_count = 4;
         if (ALLOW_DIAGONAL)
             successor_count = 8;
 
         for(int i=0; i < successor_count; i++){
-            if(successors[i] < 0)
-                continue;
-
             POINT* successor;
             successor = points_find(successors[i]);
 
@@ -225,18 +231,27 @@ void search(int sy, int sx, int dy, int dx) {
 
             int sx = successor->x;
             int sy = successor->y;
+            
             int gcost = successor->gcost;
             gcost += 10 * lut[path[sy][sx]];
             successor->gcost = gcost;
             successor->fcost = manhatten(sy, sx, dy, dx) + successor->gcost;
             successor->parent = p;
-            //printf("\tFcost=%d for node=%d%d\n", successor->fcost, sy, sx);
+            //printf("\tFcost=%d for node=%d%d parent=%d\n", successor->fcost, sy, sx, successor->parent->id);
 
             open_add(successor);
         }
+        if(p->parent != NULL)
+            printf("Lowest found was: %d parent=%d \n ", (10*p->y)+p->x, p->parent->id);
         closed_add(p);
+        closed_list[closed_size++] = p;
         memset(successors, -1, sizeof(successors));
+        if (( 10 * p->y ) + p->x == END_NODE ){
+            break;
+        }
     }
+    POINT* p = closed_list[closed_size-1];
+    create_path(p->id);
     open_destroy();
     printf("Finished :)\n");
 }

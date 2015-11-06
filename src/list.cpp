@@ -1,6 +1,6 @@
-#include "common.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "common.h"
 
 // Our "all points" list
 static POINT** points = NULL;
@@ -57,7 +57,7 @@ POINT* points_add(POINT* point) {
     points[points_size] = (POINT*) malloc(sizeof(POINT)); 
     *points[points_size] = *point;
     ++points_size;
-    sort(points, points_size);
+    //sort(points, points_size);
     return points[points_size-1];
 }
 
