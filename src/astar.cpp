@@ -74,13 +74,13 @@ void add_items(int sy=0, int sx=0, int dy=0, int dx=0) {
 
             int c_node = ( i * 10 ) + j;
 
-            if (c_node == START_NODE){
-                printf("S ");
-            }else if(c_node == END_NODE){
-                printf("E ");
-            }else{
-                printf("%i ", path[i][j]);
-            }
+            //if (c_node == START_NODE){
+                //printf("S ");
+            //}else if(c_node == END_NODE){
+                //printf("E ");
+            //}else{
+                //printf("%i ", path[i][j]);
+            //}
 
             parent = add_node(( i * 10 ) + j, j, i, parent);
             items_added++;
@@ -241,7 +241,7 @@ void search(int sy, int sx, int dy, int dx) {
         }
     }
     POINT* p = closed_list[closed_size-1];
-    create_path(p->id);
+    //create_path(p->id);
     open_destroy();
     printf("Finished :)\n");
 }
@@ -271,14 +271,6 @@ void load_map(char* mapfile){
         }
         path[i][j++] = ch;
     }
-
-    for(int i=0; i<mapHeight; i++){
-        for(int j=0; j<mapWidth; j++){
-            printf("%c",path[i][j]);
-        }
-        printf("\n");
-    }
-
 }
 
 
