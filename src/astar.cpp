@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <errno.h>
+#include <string.h>
 #include "common.h"
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
@@ -8,11 +10,11 @@
 bool first = false;
 int items_added = 0;
 
-int mapWidth = 10;
-int mapHeight = 10;
+int mapWidth = 512;
+int mapHeight = 512;
 
 int closed_size = 0;
-POINT* closed_list[200000];
+POINT* closed_list[200000000];
 
 // A Bigger map for later testing
 //int world_map[ 20 * 20 ] = 
@@ -43,18 +45,7 @@ POINT* closed_list[200000];
 //};
 
 int lut[] = {1, 9999};
-int path[10][10] = {
-    {1,1,1,1,1,1,1,1,1,1},
-    {1,0,0,0,0,0,1,1,1,1},
-    {1,0,1,1,1,0,1,1,1,1},
-    {1,0,1,1,1,0,1,1,1,1},
-    {1,0,0,0,1,0,1,1,1,1},
-    {1,1,1,0,1,0,0,0,1,1},
-    {1,1,0,0,1,0,1,0,1,1},
-    {1,1,0,0,0,1,1,1,1,1},
-    {1,1,0,1,1,0,1,0,0,1},
-    {1,1,0,0,0,0,0,0,0,0},
-};
+char path[513][512];
 
 int START_NODE = 0;
 int END_NODE = 0;
@@ -202,7 +193,6 @@ void create_path(int id){
 }
 
 void search(int sy, int sx, int dy, int dx) {
-    int lowest = 0;
     int finished = 0;
     int start_node = (10*sy)+sx;
     int END_NODE = (10*dy)+dx;
@@ -241,8 +231,8 @@ void search(int sy, int sx, int dy, int dx) {
 
             open_add(successor);
         }
-        if(p->parent != NULL)
-            printf("Lowest found was: %d parent=%d \n ", (10*p->y)+p->x, p->parent->id);
+        //if(p->parent != NULL)
+            //printf("Lowest found was: %d parent=%d \n ", (10*p->y)+p->x, p->parent->id);
         closed_add(p);
         closed_list[closed_size++] = p;
         memset(successors, -1, sizeof(successors));
@@ -256,9 +246,47 @@ void search(int sy, int sx, int dy, int dx) {
     printf("Finished :)\n");
 }
 
+void load_map(char* mapfile){
+    int i = 0;
+    int j = 0;
+    FILE *fp;
+    char ch;
+    char mystring[100];
+    fp=fopen(mapfile, "r");
+
+    if (fp == NULL) {
+        printf("Cannot open file '%s' : %s\n", mapfile, strerror(errno));
+        return;
+    }
+
+    fgets (mystring , 100 , fp);
+    fgets (mystring , 100 , fp);
+    fgets (mystring , 100 , fp);
+    fgets (mystring , 100 , fp);
+
+    while( ( ch = fgetc(fp) ) != EOF ){
+        if(j%513 == 0){
+            j=0;
+            i++;
+        }
+        path[i][j++] = ch;
+    }
+
+    for(int i=0; i<mapHeight; i++){
+        for(int j=0; j<mapWidth; j++){
+            printf("%c",path[i][j]);
+        }
+        printf("\n");
+    }
+
+}
+
+
+        
 int main() {
-    add_items(1,1,8,8);
-    search(1,1,8,8);
+    load_map("maze512-16-0.map");
+    add_items(5,5,508,508);
+    search(5,5,508,508);
     points_destroy();
     return 0;
 }
