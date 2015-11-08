@@ -10,49 +10,45 @@
 bool first = false;
 int items_added = 0;
 
-int mapWidth = 512;
-int mapHeight = 512;
+int mapWidth = 20;
+int mapHeight = 20;
 
 int closed_size = 0;
 POINT* closed_list[200000000];
 
-// A Bigger map for later testing
-//int world_map[ 20 * 20 ] = 
-//{
-
-//// 0001020304050607080910111213141516171819
-	//0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,   // 00
-	//0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,   // 00
-	//0,1,1,0,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0,   // 02
-	//0,1,1,0,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0,   // 03
-	//0,1,0,0,0,0,1,1,0,1,0,1,0,0,0,0,1,1,0,0,   // 04
-	//0,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,   // 05
-	//0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,   // 06
-	//0,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,0,   // 07
-	//0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,   // 08
-	//0,1,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0,   // 01
-	//0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,   // 00
-	//0,1,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,0,0,0,   // 00
-	//0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0,   // 02
-	//0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0,   // 03
-	//0,1,0,0,0,0,1,1,0,1,0,1,0,0,0,0,1,1,0,0,   // 04
-	//0,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,   // 05
-	//0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,   // 06
-	//0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,0,1,1,1,1,   // 07
-	//0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,   // 08
-	//0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,   // 01
-
-//};
+//A Bigger map for later testing
+int path[20][20] = {
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0},
+    {0,1,1,0,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0},
+    {0,1,1,0,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0},
+    {0,1,0,0,0,0,1,1,0,1,0,1,0,0,0,0,1,1,0,0},
+    {0,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0},
+    {0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0},
+    {0,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,0},
+    {0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0},
+    {0,1,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0},
+    {0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0},
+    {0,1,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,0,0,0},
+    {0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0},
+    {0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0},
+    {0,1,0,0,0,0,1,1,0,1,0,1,0,0,0,0,1,1,0,0},
+    {0,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0},
+    {0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0},
+    {0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,0,1,1,1,1},
+    {0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+};
 
 int lut[] = {1, 9999};
-char path[513][512];
+// char path[mapWidth][mapHeight];
 
 int START_NODE = 0;
 int END_NODE = 0;
 
 int ALLOW_DIAGONAL = 0;
 
-POINT* add_node(int _id, int x, int y, POINT* parent) {
+POINT* add_node(int _id, int y, int x, POINT* parent) {
     POINT p;
     p.id = _id;
     p.x = x;
@@ -72,21 +68,24 @@ void add_items(int sy=0, int sx=0, int dy=0, int dx=0) {
     for(i = 0; i < mapHeight; i++){
         for(j = 0; j < mapWidth; j++){
 
-            int c_node = ( i * 10 ) + j;
+            int c_node = ( i * mapWidth ) + j;
 
-            //if (c_node == START_NODE){
-                //printf("S ");
-            //}else if(c_node == END_NODE){
-                //printf("E ");
-            //}else{
-                //printf("%i ", path[i][j]);
-            //}
+            if (c_node == START_NODE){
+                printf("S ");
+            }else if(c_node == END_NODE){
+                printf("E ");
+            }else{
+                printf("%i ", path[i][j]);
+            }
 
-            parent = add_node(( i * 10 ) + j, j, i, parent);
+            printf("Adding node %d\n", c_node);
+
+            parent = add_node(c_node, j, i, parent);
             items_added++;
         }
         printf("\n");
     }
+        exit(1);
 }
 
 void find_adj(int sy, int sx, int* successors){
@@ -180,12 +179,14 @@ float chebyshev(int sy, int sx, int dy, int dx ) {
 }
 
 void create_path(int id){
-
+    int i = 0;
     POINT* p = points_find(START_NODE);
     while(p){
         int sy = p->y;
         int sx = p->x;
         printf("Testing %d%d parent=%d\n", sy,sx, p->parent->id);
+        //if(i++ > 60)
+            //break;
         if((10*sy)+sx == END_NODE)
             break;
         p = p->parent;
@@ -212,6 +213,9 @@ void search(int sy, int sx, int dy, int dx) {
         if (ALLOW_DIAGONAL)
             successor_count = 8;
 
+        if(p->parent != NULL)
+            printf("Lowest found was: %d parent=%d \n ", (10*p->y)+p->x, p->parent->id);
+
         for(int i=0; i < successor_count; i++){
             POINT* successor;
             successor = points_find(successors[i]);
@@ -227,12 +231,10 @@ void search(int sy, int sx, int dy, int dx) {
             successor->gcost = gcost;
             successor->fcost = manhatten(sy, sx, dy, dx) + successor->gcost;
             successor->parent = p;
-            //printf("\tFcost=%d for node=%d%d parent=%d\n", successor->fcost, sy, sx, successor->parent->id);
+            printf("\tFcost=%d for node=%d%d parent=%d\n", successor->fcost, sy, sx, successor->parent->id);
 
             open_add(successor);
         }
-        //if(p->parent != NULL)
-            //printf("Lowest found was: %d parent=%d \n ", (10*p->y)+p->x, p->parent->id);
         closed_add(p);
         closed_list[closed_size++] = p;
         memset(successors, -1, sizeof(successors));
@@ -241,7 +243,7 @@ void search(int sy, int sx, int dy, int dx) {
         }
     }
     POINT* p = closed_list[closed_size-1];
-    //create_path(p->id);
+    create_path(p->id);
     open_destroy();
     printf("Finished :)\n");
 }
@@ -276,9 +278,9 @@ void load_map(char* mapfile){
 
         
 int main() {
-    load_map("maze512-16-0.map");
-    add_items(5,5,508,508);
-    search(5,5,508,508);
+    //load_map("maze512-16-0.map");
+    add_items(3,3,18,18);
+    search(3,3,18,18);
     points_destroy();
     return 0;
 }
