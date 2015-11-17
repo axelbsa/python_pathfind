@@ -3,6 +3,7 @@
 #include <math.h>
 #include <errno.h>
 #include <string.h>
+#include <limits.h>
 #include "common.h"
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
@@ -43,9 +44,7 @@ int path[20][20] = {
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 };
 
-int lut[] = {1, 9999};
-// char path[mapWidth][mapHeight];
-
+int lut[] = {1, 90};
 int START_NODE = 0;
 int END_NODE = 0;
 
@@ -65,10 +64,12 @@ POINT* add_node(int id, int y, int x, POINT* parent) {
 }
 
 void add_items(int sy=0, int sx=0, int dy=0, int dx=0) {
-    START_NODE = (10 * sy) + sx;
-    END_NODE = (10 * dy) + dx; 
+    START_NODE = (mapWidth * sy) + sx;
+    END_NODE = (mapWidth * dy) + dx; 
     POINT *parent = NULL;
+
     int i,j;
+
     for(i = 0; i < mapHeight; i++){
         for(j = 0; j < mapWidth; j++){
 
@@ -111,56 +112,56 @@ void find_adj(int sy, int sx, int* successors){
 
         switch(i){
             case 0:
-                start_node = (10*sy)+sx+1;
+                start_node = (mapWidth * sy) + sx+1;
                 s_node = points_find(start_node);
                 if(s_node)
                     successors[i] = start_node;
                 break;
 
             case 1:
-                start_node = (10*(sy+1))+sx;
+                start_node = (mapWidth * (sy + 1)) + sx;
                 s_node = points_find(start_node);
                 if(s_node)
                     successors[i] = start_node;
             break;
 
             case 2:
-                start_node = (10*sy)+sx-1;
+                start_node = (mapWidth * sy) + sx - 1;
                 s_node = points_find(start_node);
                 if(s_node)
                     successors[i] = start_node;
             break;
 
             case 3:
-                start_node = (10*(sy-1))+sx;
+                start_node = (mapWidth * (sy - 1)) + sx;
                 s_node = points_find(start_node);
                 if(s_node)
                     successors[i] = start_node;
             break;
 
             case 4:
-                start_node = (10*(sy-1))+sx+1;
+                start_node = (mapWidth * (sy - 1)) + sx + 1;
                 s_node = points_find(start_node);
                 if(s_node)
                     successors[i] = start_node;
             break;
 
             case 5:
-                start_node = (10*(sy+1))+sx+1;
+                start_node = (mapWidth * (sy + 1)) + sx + 1;
                 s_node = points_find(start_node);
                 if(s_node)
                     successors[i] = start_node;
             break;
 
             case 6:
-                start_node = (10*(sy+1))+sx-1;
+                start_node = (mapWidth * (sy + 1)) + sx - 1;
                 s_node = points_find(start_node);
                 if(s_node)
                     successors[i] = start_node;
             break;
 
             case 7:
-                start_node = (10*(sy-1))+sx-1;
+                start_node = (mapWidth * (sy - 1)) + sx - 1;
                 s_node = points_find(start_node);
                 if(s_node)
                     successors[i] = start_node;
@@ -191,7 +192,7 @@ void create_path(int id){
         printf("Testing %d%d parent=%d\n", sy,sx, p->parent->id);
         if(i++ > 60)
             break;
-        if((10*sy)+sx == END_NODE)
+        if((mapWidth * sy) + sx == END_NODE)
             break;
         p = p->parent;
     };
@@ -199,8 +200,8 @@ void create_path(int id){
 
 void search(int sy, int sx, int dy, int dx) {
     int finished = 0;
-    int start_node = (10*sy)+sx;
-    int END_NODE = (10*dy)+dx;
+    int start_node = (mapWidth * sy) + sx;
+    int END_NODE = (mapWidth * dy) + dx;
 
     POINT* s_node = points_find(start_node);
     printf("im searching\n");
@@ -210,7 +211,6 @@ void search(int sy, int sx, int dy, int dx) {
     while(open_size() > 0 && finished == 0){
 
         POINT* p = open_del();
-
         find_adj(p->y, p->x, successors);
 
         int successor_count = 4;
@@ -218,7 +218,7 @@ void search(int sy, int sx, int dy, int dx) {
             successor_count = 8;
 
         if(p->parent != NULL)
-            printf("Lowest found was: %d parent=%d \n ", (10*p->y)+p->x, p->parent->id);
+            printf("Lowest found was: %d parent=%d \n ", (mapWidth * p->y) + p->x, p->parent->id);
 
         for(int i=0; i < successor_count; i++){
             POINT* successor;
@@ -229,9 +229,9 @@ void search(int sy, int sx, int dy, int dx) {
 
             int sx = successor->x;
             int sy = successor->y;
-            
             int gcost = successor->gcost;
-            gcost += 10 * lut[path[sy][sx]];
+
+            gcost += 8 * lut[path[sy][sx]];
 
             printf("Gcost = %d \n",gcost);
             successor->gcost = gcost;
@@ -241,13 +241,16 @@ void search(int sy, int sx, int dy, int dx) {
 
             open_add(successor);
         }
+
         closed_add(p);
         closed_list[(p->y*mapWidth)+p->x] = p;
         memset(successors, -1, sizeof(successors));
-        if (( 10 * p->y ) + p->x == END_NODE ){
+
+        if (( mapWidth * p->y ) + p->x == END_NODE ){
             break;
         }
     }
+
     POINT* p = closed_list[closed_size-1];
     create_path(p->id);
     open_destroy();
