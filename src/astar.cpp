@@ -84,8 +84,6 @@ void add_items(int sy=0, int sx=0, int dy=0, int dx=0) {
                 printf("%i ", path[i][j]);
             }
 
-            printf("Adding node %d\n", c_node);
-
             parent = add_node(c_node, i, j, parent);
             items_added++;
         }
@@ -204,7 +202,7 @@ void search(int sy, int sx, int dy, int dx) {
     int END_NODE = (mapWidth * dy) + dx;
 
     POINT* s_node = points_find(start_node);
-    printf("im searching\n");
+    printf("im searching for %d from %d\n", END_NODE, start_node);
 
     open_add(s_node);
     int successors[] = {-1, -1, -1, -1, -1, -1, -1, -1};
@@ -217,8 +215,8 @@ void search(int sy, int sx, int dy, int dx) {
         if (ALLOW_DIAGONAL)
             successor_count = 8;
 
-        if(p->parent != NULL)
-            printf("Lowest found was: %d parent=%d \n ", (mapWidth * p->y) + p->x, p->parent->id);
+        printf("Lowest found was: %d parent=%d \n ",
+                p->id, p->parent ? p->parent->id : 0);
 
         for(int i=0; i < successor_count; i++){
             POINT* successor;
@@ -251,9 +249,9 @@ void search(int sy, int sx, int dy, int dx) {
         }
     }
 
-    POINT* p = closed_list[closed_size-1];
-    create_path(p->id);
-    open_destroy();
+    //POINT* p = closed_list[closed_size-1];
+    //create_path(p->id);
+    //open_destroy();
     printf("Finished :)\n");
 }
 
