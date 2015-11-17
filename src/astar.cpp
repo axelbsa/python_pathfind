@@ -7,6 +7,8 @@
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 
+#define MAX_MAP_SIZE 1024*1024
+
 bool first = false;
 int items_added = 0;
 
@@ -14,7 +16,8 @@ int mapWidth = 20;
 int mapHeight = 20;
 
 int closed_size = 0;
-POINT* closed_list[200000000];
+POINT* closed_list[MAX_MAP_SIZE];
+POINT* ppoints[MAX_MAP_SIZE];
 
 //A Bigger map for later testing
 int path[20][20] = {
@@ -48,15 +51,16 @@ int END_NODE = 0;
 
 int ALLOW_DIAGONAL = 0;
 
-POINT* add_node(int _id, int y, int x, POINT* parent) {
+POINT* add_node(int id, int y, int x, POINT* parent) {
     POINT p;
-    p.id = _id;
+    p.id = id;
     p.x = x;
     p.y = y;
     p.fcost = 0;
     p.hcost = 0;
     p.gcost = 0;
     p.parent = 0;
+    ppoints[(y*mapWidth)+x] = &p;
     return points_add(&p);
 }
 
@@ -68,7 +72,8 @@ void add_items(int sy=0, int sx=0, int dy=0, int dx=0) {
     for(i = 0; i < mapHeight; i++){
         for(j = 0; j < mapWidth; j++){
 
-            int c_node = ( i * mapWidth ) + j;
+            int c_node;
+            c_node = (i * mapWidth) + j;
 
             if (c_node == START_NODE){
                 printf("S ");
@@ -80,12 +85,11 @@ void add_items(int sy=0, int sx=0, int dy=0, int dx=0) {
 
             printf("Adding node %d\n", c_node);
 
-            parent = add_node(c_node, j, i, parent);
+            parent = add_node(c_node, i, j, parent);
             items_added++;
         }
         printf("\n");
     }
-        exit(1);
 }
 
 void find_adj(int sy, int sx, int* successors){
@@ -185,8 +189,8 @@ void create_path(int id){
         int sy = p->y;
         int sx = p->x;
         printf("Testing %d%d parent=%d\n", sy,sx, p->parent->id);
-        //if(i++ > 60)
-            //break;
+        if(i++ > 60)
+            break;
         if((10*sy)+sx == END_NODE)
             break;
         p = p->parent;
@@ -228,6 +232,8 @@ void search(int sy, int sx, int dy, int dx) {
             
             int gcost = successor->gcost;
             gcost += 10 * lut[path[sy][sx]];
+
+            printf("Gcost = %d \n",gcost);
             successor->gcost = gcost;
             successor->fcost = manhatten(sy, sx, dy, dx) + successor->gcost;
             successor->parent = p;
@@ -236,7 +242,7 @@ void search(int sy, int sx, int dy, int dx) {
             open_add(successor);
         }
         closed_add(p);
-        closed_list[closed_size++] = p;
+        closed_list[(p->y*mapWidth)+p->x] = p;
         memset(successors, -1, sizeof(successors));
         if (( 10 * p->y ) + p->x == END_NODE ){
             break;
@@ -267,7 +273,7 @@ void load_map(char* mapfile){
     fgets (mystring , 100 , fp);
 
     while( ( ch = fgetc(fp) ) != EOF ){
-        if(j%513 == 0){
+        if(j % 513 == 0){
             j=0;
             i++;
         }
@@ -279,8 +285,8 @@ void load_map(char* mapfile){
         
 int main() {
     //load_map("maze512-16-0.map");
-    add_items(3,3,18,18);
-    search(3,3,18,18);
+    add_items(3,3,6,10);
+    search(3,3,6,10);
     points_destroy();
     return 0;
 }
