@@ -249,7 +249,7 @@ void search(int sy, int sx, int dy, int dx) {
         }
     }
 
-    create_path(start_node);
+    create_path(END_NODE);
     //open_destroy();
     printf("Finished :)\n");
 }
