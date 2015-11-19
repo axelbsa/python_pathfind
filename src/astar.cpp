@@ -202,10 +202,13 @@ void create_path(POINT* p){
     while(p != NULL){
         int sy = p->y;
         int sx = p->x;
-        printf("Testing %d%d parent=%d%d\n", sy,sx, p->parent->y, p->parent->x);
+        printf("Testing %d%d parent=%d%d\n", 
+                sy,sx, 
+                p->parent ? p->parent->y : 0,
+                p->parent ? p->parent->x : 0
+        );
         //if((mapWidth * sy) + sx == END_NODE)
             //break;
-        p = closed_find(p->parent->id);
         p = p->parent;
 
     };
