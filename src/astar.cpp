@@ -202,7 +202,7 @@ void search(int sy, int sx, int dy, int dx) {
     int END_NODE = (mapWidth * dy) + dx;
 
     POINT* s_node = points_find(start_node);
-    printf("im searching for %d from %d\n", END_NODE, start_node);
+    //printf("im searching for %d from %d\n", END_NODE, start_node);
 
     open_add(s_node);
     int successors[] = {-1, -1, -1, -1, -1, -1, -1, -1};
@@ -215,8 +215,8 @@ void search(int sy, int sx, int dy, int dx) {
         if (ALLOW_DIAGONAL)
             successor_count = 8;
 
-        printf("Lowest found was: %d parent=%d \n ",
-                p->id, p->parent ? p->parent->id : 0);
+        //printf("Lowest found was: %d parent=%d \n ",
+                //p->id, p->parent ? p->parent->id : 0);
 
         for(int i=0; i < successor_count; i++){
             POINT* successor;
@@ -231,17 +231,17 @@ void search(int sy, int sx, int dy, int dx) {
 
             gcost += 8 * lut[path[sy][sx]];
 
-            printf("Gcost = %d \n",gcost);
+            //printf("Gcost = %d \n",gcost);
             successor->gcost = gcost;
             successor->fcost = manhatten(sy, sx, dy, dx) + successor->gcost;
             successor->parent = p;
-            printf("\tFcost=%d for node=%d%d parent=%d\n", successor->fcost, sy, sx, successor->parent->id);
+            //printf("\tFcost=%d for node=%d%d parent=%d\n", successor->fcost, sy, sx, successor->parent->id);
 
             open_add(successor);
         }
 
         closed_add(p);
-        closed_list[(p->y*mapWidth)+p->x] = p;
+        //closed_list[(p->y*mapWidth)+p->x] = p;
         memset(successors, -1, sizeof(successors));
 
         if (( mapWidth * p->y ) + p->x == END_NODE ){
@@ -249,8 +249,7 @@ void search(int sy, int sx, int dy, int dx) {
         }
     }
 
-    //POINT* p = closed_list[closed_size-1];
-    //create_path(p->id);
+    create_path(start_node);
     //open_destroy();
     printf("Finished :)\n");
 }
@@ -286,8 +285,8 @@ void load_map(char* mapfile){
         
 int main() {
     //load_map("maze512-16-0.map");
-    add_items(3,3,6,10);
-    search(3,3,6,10);
+    add_items(3,3,18,18);
+    search(3,3,18,18);
     points_destroy();
     return 0;
 }
