@@ -253,9 +253,6 @@ void search(int sy, int sx, int dy, int dx) {
             int gcost = successor->gcost;
             gcost += 5 * lut[path[sy][sx]];
 
-            successor->fcost = manhatten(sy, sx, dy, dx) + gcost;
-            successor->gcost = gcost;
-            successor->parent = p;
 
             printf("\tLowest found was: %d%d parent=%d%d \n",
                     successor->y, successor->x,
@@ -277,6 +274,9 @@ void search(int sy, int sx, int dy, int dx) {
                     continue;
             }
 
+            successor->fcost = manhatten(sy, sx, dy, dx) + gcost;
+            successor->gcost = gcost;
+            successor->parent = p;
             open_add(successor);
         }
 
