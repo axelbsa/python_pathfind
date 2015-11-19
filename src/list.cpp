@@ -54,6 +54,18 @@ static POINT* c_search(POINT** list, size_t size, int id) {
     return NULL;
 }
 
+void list_closed(size_t size) {
+    printf("\t\tPRINTING CLOSED LIST \n");
+    for (size_t i = 0; i < size; i++) {
+        printf("\t\tCurrent=%d%d Parrent=%d%d\n", 
+                closed[i]->y,
+                closed[i]->x,
+                closed[i]->parent ? closed[i]->parent->y : 0,
+                closed[i]->parent ? closed[i]->parent->x : 0
+        );
+    }
+}
+
 POINT* points_add(POINT* point) {
     if (points == NULL) {
         points = (POINT**) malloc(sizeof(POINT*) * points_size_max);
@@ -78,6 +90,13 @@ POINT* points_find(int id) {
 POINT* closed_find(int id) {
     return search(closed, closed_size, id);
 }
+
+
+void cl_print() {
+    list_closed(closed_size);
+}
+
+
 
 void points_destroy() {
     for (size_t i = 0; i < points_size; ++i) {

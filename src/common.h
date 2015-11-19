@@ -44,4 +44,6 @@ void closed_destroy();
 
 POINT* closed_find(int id);
 
+void cl_print();
+
 #endif // FOO_H_

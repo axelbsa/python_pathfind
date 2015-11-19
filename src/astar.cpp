@@ -203,8 +203,8 @@ void create_path(POINT* p){
         int sy = p->y;
         int sx = p->x;
         printf("Testing %d%d parent=%d%d\n", sy,sx, p->parent->y, p->parent->x);
-        if((mapWidth * sy) + sx == END_NODE)
-            break;
+        //if((mapWidth * sy) + sx == END_NODE)
+            //break;
         //p = closed_find(p->parent->id);
         p = p->parent;
 
@@ -230,8 +230,9 @@ void search(int sy, int sx, int dy, int dx) {
             goto end;
         }
         closed_add(p);
+        cl_print();
 
-        int successor_count = 8;
+        int successor_count = 4;
         if (ALLOW_DIAGONAL)
             successor_count = 8;
 
