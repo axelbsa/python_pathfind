@@ -55,14 +55,7 @@ static POINT* c_search(POINT** list, size_t size, int id) {
 }
 
 void list_closed(size_t size) {
-    printf("\t\tPRINTING CLOSED LIST \n");
     for (size_t i = 0; i < size; i++) {
-        printf("\t\tCurrent=%d%d Parrent=%d%d\n", 
-                closed[i]->y,
-                closed[i]->x,
-                closed[i]->parent ? closed[i]->parent->y : 0,
-                closed[i]->parent ? closed[i]->parent->x : 0
-        );
     }
 }
 

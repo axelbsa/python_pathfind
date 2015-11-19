@@ -33,7 +33,7 @@ int path[20][20] = {
     {0,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,0},
     {0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0},
     {0,1,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0},
-    {0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0},
+    {0,1,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0},
     {0,1,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,0,0,0},
     {0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0},
     {0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0},
@@ -207,8 +207,6 @@ void create_path(POINT* p){
                 p->parent ? p->parent->y : 0,
                 p->parent ? p->parent->x : 0
         );
-        //if((mapWidth * sy) + sx == END_NODE)
-            //break;
         p = p->parent;
 
     };
@@ -239,12 +237,12 @@ void search(int sy, int sx, int dy, int dx) {
         if (ALLOW_DIAGONAL)
             successor_count = 8;
 
-        printf("Lowest found was: %d%d fcost=%d parent=%d%d\n",
-                p->y, p->x,
-                p->fcost,
-                p->parent ? (p->parent->y) : 0,
-                p->parent ? (p->parent->x) : 0
-        );
+        //printf("Lowest found was: %d%d fcost=%d parent=%d%d\n",
+                //p->y, p->x,
+                //p->fcost,
+                //p->parent ? (p->parent->y) : 0,
+                //p->parent ? (p->parent->x) : 0
+        //);
 
         for(int i=0; i < successor_count; i++){
             POINT* successor;
@@ -261,12 +259,12 @@ void search(int sy, int sx, int dy, int dx) {
             successor->fcost = manhatten(sy, sx, dy, dx) + gcost;
             successor->gcost = gcost;
 
-            printf("\tLowest found was: %d%d, fcost=%d parent=%d%d \n",
-                    successor->y, successor->x,
-                    successor->fcost,
-                    successor->parent ? (successor->parent->y) : 0,
-                    successor->parent ? (successor->parent->x) : 0
-            );
+            //printf("\tLowest found was: %d%d, fcost=%d parent=%d%d \n",
+                    //successor->y, successor->x,
+                    //successor->fcost,
+                    //successor->parent ? (successor->parent->y) : 0,
+                    //successor->parent ? (successor->parent->x) : 0
+            //);
 
             POINT *tmp = open_search(successor->id);
             if (tmp) {
