@@ -231,7 +231,7 @@ void search(int sy, int sx, int dy, int dx) {
         if (ALLOW_DIAGONAL)
             successor_count = 8;
 
-        printf("Lowest found was: %d%d parent=%d%d \n ",
+        printf("Lowest found was: %d%d parent=%d%d \n",
                 p->y, p->x,
                 p->parent ? (p->parent->y) : 0,
                 p->parent ? (p->parent->x) : 0
