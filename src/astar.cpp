@@ -254,6 +254,12 @@ void search(int sy, int sx, int dy, int dx) {
             successor->gcost = gcost;
             successor->parent = p;
 
+            printf("\tLowest found was: %d%d parent=%d%d \n",
+                    successor->y, successor->x,
+                    successor->parent ? (successor->parent->y) : 0,
+                    successor->parent ? (successor->parent->x) : 0
+            );
+
             //POINT *tmp = open_search(successor->id);
             //if (tmp) {
 
