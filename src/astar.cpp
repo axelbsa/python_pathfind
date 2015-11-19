@@ -192,6 +192,9 @@ float chebyshev(int sy, int sx, int dy, int dx ) {
     return D * (tx + ty) + (D*2 - 2 * D) * MIN(tx, ty);
 }
 
+int test[200];
+size_t cl = 0;
+
 void create_path(int id){
 
     int i = 0;
@@ -228,13 +231,14 @@ void search(int sy, int sx, int dy, int dx) {
         if (ALLOW_DIAGONAL)
             successor_count = 8;
 
-        printf("Lowest found was: %d %d parent=%d %d \n ",
-                p->id, p->id,
-                p->parent ? (p->parent->id) : 0,
-                p->parent ? (p->parent->id) : 0
+        printf("Lowest found was: %d%d parent=%d%d \n ",
+                p->y, p->x,
+                p->parent ? (p->parent->y) : 0,
+                p->parent ? (p->parent->x) : 0
         );
 
         closed_add(p);
+        test[cl++] = p->id;
 
         for(int i=0; i < successor_count; i++){
             POINT* successor;
