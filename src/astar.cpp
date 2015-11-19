@@ -205,7 +205,7 @@ void create_path(POINT* p){
         printf("Testing %d%d parent=%d%d\n", sy,sx, p->parent->y, p->parent->x);
         //if((mapWidth * sy) + sx == END_NODE)
             //break;
-        //p = closed_find(p->parent->id);
+        p = closed_find(p->parent->id);
         p = p->parent;
 
     };
@@ -236,8 +236,9 @@ void search(int sy, int sx, int dy, int dx) {
         if (ALLOW_DIAGONAL)
             successor_count = 8;
 
-        printf("Lowest found was: %d%d parent=%d%d \n",
+        printf("Lowest found was: %d%d fcost=%d parent=%d%d\n",
                 p->y, p->x,
+                p->fcost,
                 p->parent ? (p->parent->y) : 0,
                 p->parent ? (p->parent->x) : 0
         );
@@ -252,10 +253,14 @@ void search(int sy, int sx, int dy, int dx) {
             int sx = successor->x;
             int sy = successor->y;
             int gcost = successor->gcost;
-            gcost += 5 * lut[path[sy][sx]];
 
-            printf("\tLowest found was: %d%d parent=%d%d \n",
+            gcost += 2 * lut[path[sy][sx]];
+            successor->fcost = manhatten(sy, sx, dy, dx) + gcost;
+            successor->gcost = gcost;
+
+            printf("\tLowest found was: %d%d, fcost=%d parent=%d%d \n",
                     successor->y, successor->x,
+                    successor->fcost,
                     successor->parent ? (successor->parent->y) : 0,
                     successor->parent ? (successor->parent->x) : 0
             );
@@ -263,19 +268,17 @@ void search(int sy, int sx, int dy, int dx) {
             POINT *tmp = open_search(successor->id);
             if (tmp) {
 
-                if (tmp->fcost < successor->fcost)
+                if (tmp->fcost <= successor->fcost)
                     continue;
             }
 
             tmp = closed_find(successor->id);
             if (tmp) {
 
-                if(tmp->fcost < successor->fcost)
+                if(tmp->fcost <= successor->fcost)
                     continue;
             }
 
-            successor->fcost = manhatten(sy, sx, dy, dx) + gcost;
-            successor->gcost = gcost;
             successor->parent = p;
             open_add(successor);
         }
