@@ -15,37 +15,39 @@
 bool first = false;
 int items_added = 0;
 
-int mapWidth = 20;
-int mapHeight = 20;
+int mapWidth = 512;
+int mapHeight = 512;
 
 int closed_size = 0;
 POINT* closed_list[MAX_MAP_SIZE];
 
 //A Bigger map for later testing
-int path[20][20] = {
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0},
-    {0,1,1,0,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0},
-    {0,1,1,0,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0},
-    {0,1,0,0,0,0,1,1,0,1,0,1,0,0,0,0,1,1,0,0},
-    {0,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0},
-    {0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0},
-    {0,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,0},
-    {0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0},
-    {0,1,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0},
-    {0,1,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0},
-    {0,1,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,0,0,0},
-    {0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0},
-    {0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0},
-    {0,1,0,0,0,0,1,1,0,1,0,1,0,0,0,0,1,1,0,0},
-    {0,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0},
-    {0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0},
-    {0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1},
-    {0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-};
+int path[512][512];
+//int path[20][20] = {
+    //{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    //{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0},
+    //{0,1,1,0,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0},
+    //{0,1,1,0,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0},
+    //{0,1,0,0,0,0,1,1,0,1,0,1,0,0,0,0,1,1,0,0},
+    //{0,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0},
+    //{0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0},
+    //{0,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,0},
+    //{0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0},
+    //{0,1,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0},
+    //{0,1,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0},
+    //{0,1,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,0,0,0},
+    //{0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0},
+    //{0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0},
+    //{0,1,0,0,0,0,1,1,0,1,0,1,0,0,0,0,1,1,0,0},
+    //{0,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0},
+    //{0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0},
+    //{0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1},
+    //{0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0},
+    //{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+//};
 
-int lut[] = {1, 90};
+int lut[200];
+
 int START_NODE = 0;
 int END_NODE = 0;
 
@@ -69,38 +71,38 @@ void add_items(int sy=0, int sx=0, int dy=0, int dx=0) {
     POINT *parent = NULL;
 
     int i,j;
-    printf("    ");
-    for (int i=0; i < mapWidth; i++) {
-        printf("%02d ",i);
-    }
-    printf("\n");
+    //printf("    ");
+    //for (int i=0; i < mapWidth; i++) {
+        //printf("%02d ",i);
+    //}
+    //printf("\n");
 
-    printf("    ");
-    for (int i=0; i < mapWidth; i++) {
-        printf("===",i);
-    }
-    printf("\n");
+    //printf("    ");
+    //for (int i=0; i < mapWidth; i++) {
+        //printf("===",i);
+    //}
+    //printf("\n");
 
     for(i = 0; i < mapHeight; i++){
-        printf("%02d| ",i);
+        //printf("%02d| ",i);
         for(j = 0; j < mapWidth; j++){
 
             int c_node = (i * mapWidth) + j;
 
-            if (c_node == START_NODE){
-                printf("SS ");
-            }else if(c_node == END_NODE){
-                printf("EE ");
-            }else{
-                printf("%i%i ", path[i][j], path[i][j]);
-            }
+            //if (c_node == START_NODE){
+                //printf("SS ");
+            //}else if(c_node == END_NODE){
+                //printf("EE ");
+            //}else{
+                //printf("%i%i ", path[i][j], path[i][j]);
+            //}
 
             parent = add_node(c_node, i, j, parent);
             items_added++;
         }
-        printf("\n");
+        //printf("\n");
     }
-    printf("\n");
+    //printf("\n");
 }
 
 void find_adj(int sy, int sx, int* successors){
@@ -196,16 +198,16 @@ int test[200];
 size_t cl = 0;
 
 void create_path(POINT* p){
-    printf("HELLO\n");
     int i = 0;
     //POINT* p = closed_find(id);
     while(p != NULL){
         int sy = p->y;
         int sx = p->x;
-        printf("Testing %d%d parent=%d%d\n", 
+        path[sy][sx] = 'X';
+        printf("(%d,%d)\n", 
                 sy,sx, 
-                p->parent ? p->parent->y : 0,
-                p->parent ? p->parent->x : 0
+                p->parent ? p->parent->x : 0,
+                p->parent ? p->parent->y : 0
         );
         p = p->parent;
 
@@ -217,7 +219,7 @@ void search(int sy, int sx, int dy, int dx) {
     int END_NODE = (mapWidth * dy) + dx;
 
     POINT* s_node = points_find(start_node);
-    //printf("im searching for %d from %d\n", END_NODE, start_node);
+    printf("im searching for %d from %d\n", END_NODE, start_node);
 
     open_add(s_node);
     int successors[] = {-1, -1, -1, -1, -1, -1, -1, -1};
@@ -233,7 +235,7 @@ void search(int sy, int sx, int dy, int dx) {
         closed_add(p);
         cl_print();
 
-        int successor_count = 4;
+        int successor_count = 8;
         if (ALLOW_DIAGONAL)
             successor_count = 8;
 
@@ -255,8 +257,9 @@ void search(int sy, int sx, int dy, int dx) {
             int sy = successor->y;
             int gcost = successor->gcost;
 
-            gcost += 2 * lut[path[sy][sx]];
-            successor->fcost = manhatten(sy, sx, dy, dx) + gcost;
+            gcost += 14 * lut[path[sy][sx]];
+            successor->fcost = chebyshev(sy, sx, dy, dx) + gcost;
+
             successor->gcost = gcost;
 
             //printf("\tLowest found was: %d%d, fcost=%d parent=%d%d \n",
@@ -291,7 +294,8 @@ void search(int sy, int sx, int dy, int dx) {
 end:
     open_destroy();
     //create_path(END_NODE);
-    printf("Finished :)\n");
+    //printf("Finished :)\n");
+
 }
 
 void load_map(char* mapfile){
@@ -322,9 +326,25 @@ void load_map(char* mapfile){
 }
 
 int main() {
-    //load_map("maze512-16-0.map");
-    add_items(3,3,18,18);
-    search(3,3,18,18);
+    lut[63] = 999;
+    lut[64] = 999;
+    lut[46] = 1;
+    lut[47] = 1;
+
+    load_map("maze512-16-0.map");
+    add_items(3,3,25,67);
+    search(3,3,25,67);
     points_destroy();
+
+    
+    for (int i=0; i<mapHeight; i++) {
+        for (int j=0; j<mapWidth; j++ ){
+
+            printf("%c ", path[i][j]);
+        }
+        printf("\n");
+    }
+    
+        
     return 0;
 }
