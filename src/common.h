@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-#define INIT_HEAP_SIZE (256*256)
+#define INIT_HEAP_SIZE (1024*1024)
 
 struct Points {
     int x;
@@ -33,6 +33,8 @@ POINT * open_del();
 size_t open_size();
 
 void open_destroy();
+
+int open_search(POINT *point);
 
 
 

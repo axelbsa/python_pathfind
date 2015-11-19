@@ -18,7 +18,6 @@ int mapHeight = 20;
 
 int closed_size = 0;
 POINT* closed_list[MAX_MAP_SIZE];
-POINT* ppoints[MAX_MAP_SIZE];
 
 //A Bigger map for later testing
 int path[20][20] = {
@@ -59,7 +58,6 @@ POINT* add_node(int id, int y, int x, POINT* parent) {
     p.hcost = 0;
     p.gcost = 0;
     p.parent = 0;
-    ppoints[(y*mapWidth)+x] = &p;
     return points_add(&p);
 }
 
@@ -73,8 +71,7 @@ void add_items(int sy=0, int sx=0, int dy=0, int dx=0) {
     for(i = 0; i < mapHeight; i++){
         for(j = 0; j < mapWidth; j++){
 
-            int c_node;
-            c_node = (i * mapWidth) + j;
+            int c_node = (i * mapWidth) + j;
 
             if (c_node == START_NODE){
                 printf("S ");
@@ -183,7 +180,7 @@ float chebyshev(int sy, int sx, int dy, int dx ) {
 
 void create_path(int id){
     int i = 0;
-    POINT* p = points_find(START_NODE);
+    POINT* p = points_find(id);
     while(p){
         int sy = p->y;
         int sx = p->x;
@@ -228,20 +225,25 @@ void search(int sy, int sx, int dy, int dx) {
             int sx = successor->x;
             int sy = successor->y;
             int gcost = successor->gcost;
+            gcost += 5 * lut[path[sy][sx]];
 
-            gcost += 8 * lut[path[sy][sx]];
+            successor->fcost = manhatten(sy, sx, dy, dx) + gcost;
+            successor->gcost = gcost;
+            successor->parent = p;
 
             //printf("Gcost = %d \n",gcost);
-            successor->gcost = gcost;
-            successor->fcost = manhatten(sy, sx, dy, dx) + successor->gcost;
-            successor->parent = p;
             //printf("\tFcost=%d for node=%d%d parent=%d\n", successor->fcost, sy, sx, successor->parent->id);
+            
+            int tmp_fcost = open_search(successor);
+            if (tmp_fcost) {
+                if (tmp_fcost < successor->fcost)
+                    continue;
+            }
 
             open_add(successor);
         }
 
         closed_add(p);
-        //closed_list[(p->y*mapWidth)+p->x] = p;
         memset(successors, -1, sizeof(successors));
 
         if (( mapWidth * p->y ) + p->x == END_NODE ){
@@ -249,8 +251,8 @@ void search(int sy, int sx, int dy, int dx) {
         }
     }
 
-    create_path(END_NODE);
-    //open_destroy();
+    create_path(start_node);
+    open_destroy();
     printf("Finished :)\n");
 }
 

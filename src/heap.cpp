@@ -1,8 +1,8 @@
 #include "common.h"
 #include <stdlib.h>
-#ifdef DEBUG
 #include <stdio.h>
-#endif
+
+POINT* ppoints[INIT_HEAP_SIZE];
 
 // Holds the heap in memory
 static POINT** heap = NULL;
@@ -12,6 +12,16 @@ static size_t size = 0;
 
 // Maximum heap size
 static size_t max_size = INIT_HEAP_SIZE;
+
+int open_search(POINT *point) {
+    for (int i = 0; i < size; i++) {
+        printf("HEAP COST %d\n", ppoints[i]->fcost);
+        if (point->id == heap[i]->id){
+            return heap[i]->fcost;
+        }
+    }
+    return 0;
+}
 
 void open_add(POINT *point) {
     if (heap == NULL) {
@@ -33,6 +43,7 @@ void open_add(POINT *point) {
 
     // Insert node in available space
     heap[hole] = point;
+    ppoints[point->id] = point;
 }
 
 static void percolateDown(size_t hole) {
