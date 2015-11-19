@@ -195,18 +195,18 @@ float chebyshev(int sy, int sx, int dy, int dx ) {
 int test[200];
 size_t cl = 0;
 
-void create_path(int id){
-
+void create_path(POINT* p){
+    printf("HELLO\n");
     int i = 0;
-    POINT* p = closed_find(id);
-    while(1){
+    //POINT* p = closed_find(id);
+    while(p != NULL){
         int sy = p->y;
         int sx = p->x;
         printf("Testing %d%d parent=%d%d\n", sy,sx, p->parent->y, p->parent->x);
         if((mapWidth * sy) + sx == START_NODE)
             break;
-        p = closed_find(p->parent->id);
-        //p = p->parent;
+        //p = closed_find(p->parent->id);
+        p = p->parent;
 
     };
 }
@@ -225,6 +225,11 @@ void search(int sy, int sx, int dy, int dx) {
         POINT* p = open_del();
         find_adj(p->y, p->x, successors);
 
+        if (( mapWidth * p->y ) + p->x == END_NODE ){
+            create_path(p);
+        }
+        closed_add(p);
+
         int successor_count = 8;
         if (ALLOW_DIAGONAL)
             successor_count = 8;
@@ -235,8 +240,6 @@ void search(int sy, int sx, int dy, int dx) {
                 p->parent ? (p->parent->x) : 0
         );
 
-        closed_add(p);
-        test[cl++] = p->id;
 
         for(int i=0; i < successor_count; i++){
             POINT* successor;
@@ -260,33 +263,30 @@ void search(int sy, int sx, int dy, int dx) {
                     successor->parent ? (successor->parent->x) : 0
             );
 
-            //POINT *tmp = open_search(successor->id);
-            //if (tmp) {
+            POINT *tmp = open_search(successor->id);
+            if (tmp) {
 
-                //if (tmp->fcost < successor->fcost)
-                    //continue;
-            //}
+                if (tmp->fcost < successor->fcost)
+                    continue;
+            }
 
-            //tmp = closed_find(successor->id);
-            //if (tmp) {
+            tmp = closed_find(successor->id);
+            if (tmp) {
 
-                //if(tmp->fcost < successor->fcost)
-                    //continue;
-            //}
+                if(tmp->fcost < successor->fcost)
+                    continue;
+            }
 
             open_add(successor);
         }
 
         memset(successors, -1, sizeof(successors));
 
-        if (( mapWidth * p->y ) + p->x == END_NODE ){
-            break;
-        }
     }
 
     open_destroy();
+    //create_path(END_NODE);
     printf("Finished :)\n");
-    create_path(END_NODE);
 }
 
 void load_map(char* mapfile){
