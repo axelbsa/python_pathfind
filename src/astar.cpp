@@ -203,7 +203,7 @@ void create_path(POINT* p){
         int sy = p->y;
         int sx = p->x;
         printf("Testing %d%d parent=%d%d\n", sy,sx, p->parent->y, p->parent->x);
-        if((mapWidth * sy) + sx == START_NODE)
+        if((mapWidth * sy) + sx == END_NODE)
             break;
         //p = closed_find(p->parent->id);
         p = p->parent;
@@ -227,6 +227,7 @@ void search(int sy, int sx, int dy, int dx) {
 
         if (( mapWidth * p->y ) + p->x == END_NODE ){
             create_path(p);
+            goto end;
         }
         closed_add(p);
 
@@ -240,7 +241,6 @@ void search(int sy, int sx, int dy, int dx) {
                 p->parent ? (p->parent->x) : 0
         );
 
-
         for(int i=0; i < successor_count; i++){
             POINT* successor;
             successor = points_find(successors[i]);
@@ -252,7 +252,6 @@ void search(int sy, int sx, int dy, int dx) {
             int sy = successor->y;
             int gcost = successor->gcost;
             gcost += 5 * lut[path[sy][sx]];
-
 
             printf("\tLowest found was: %d%d parent=%d%d \n",
                     successor->y, successor->x,
@@ -284,6 +283,7 @@ void search(int sy, int sx, int dy, int dx) {
 
     }
 
+end:
     open_destroy();
     //create_path(END_NODE);
     printf("Finished :)\n");
