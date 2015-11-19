@@ -13,14 +13,13 @@ static size_t size = 0;
 // Maximum heap size
 static size_t max_size = INIT_HEAP_SIZE;
 
-int open_search(POINT *point) {
-    for (int i = 0; i < size; i++) {
-        printf("HEAP COST %d\n", ppoints[i]->fcost);
-        if (point->id == heap[i]->id){
-            return heap[i]->fcost;
-        }
+POINT* open_search(int id) {
+    for (int i=0; i < size; i++) {
+        POINT *tmp = heap[i]; 
+        if (tmp && tmp->id == id)
+            return tmp;
     }
-    return 0;
+    return NULL;
 }
 
 void open_add(POINT *point) {

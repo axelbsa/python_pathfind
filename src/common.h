@@ -34,7 +34,7 @@ size_t open_size();
 
 void open_destroy();
 
-int open_search(POINT *point);
+POINT * open_search(int id);
 
 
 
@@ -42,5 +42,6 @@ void closed_add(POINT* point);
 
 void closed_destroy();
 
+POINT* closed_find(int id);
 
 #endif // FOO_H_

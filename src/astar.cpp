@@ -6,6 +6,8 @@
 #include <limits.h>
 #include "common.h"
 
+#include <map>
+
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 
 #define MAX_MAP_SIZE 1024*1024
@@ -38,7 +40,7 @@ int path[20][20] = {
     {0,1,0,0,0,0,1,1,0,1,0,1,0,0,0,0,1,1,0,0},
     {0,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0},
     {0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0},
-    {0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,0,1,1,1,1},
+    {0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1},
     {0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 };
@@ -57,7 +59,7 @@ POINT* add_node(int id, int y, int x, POINT* parent) {
     p.fcost = 0;
     p.hcost = 0;
     p.gcost = 0;
-    p.parent = 0;
+    p.parent = NULL;
     return points_add(&p);
 }
 
@@ -67,18 +69,30 @@ void add_items(int sy=0, int sx=0, int dy=0, int dx=0) {
     POINT *parent = NULL;
 
     int i,j;
+    printf("    ");
+    for (int i=0; i < mapWidth; i++) {
+        printf("%02d ",i);
+    }
+    printf("\n");
+
+    printf("    ");
+    for (int i=0; i < mapWidth; i++) {
+        printf("===",i);
+    }
+    printf("\n");
 
     for(i = 0; i < mapHeight; i++){
+        printf("%02d| ",i);
         for(j = 0; j < mapWidth; j++){
 
             int c_node = (i * mapWidth) + j;
 
             if (c_node == START_NODE){
-                printf("S ");
+                printf("SS ");
             }else if(c_node == END_NODE){
-                printf("E ");
+                printf("EE ");
             }else{
-                printf("%i ", path[i][j]);
+                printf("%i%i ", path[i][j], path[i][j]);
             }
 
             parent = add_node(c_node, i, j, parent);
@@ -86,12 +100,12 @@ void add_items(int sy=0, int sx=0, int dy=0, int dx=0) {
         }
         printf("\n");
     }
+    printf("\n");
 }
 
 void find_adj(int sy, int sx, int* successors){
 
-    /* Representation of adjecent
-     * nodes
+    /* Representation of adjecent nodes
      * +-----+
      * |7|3|4|
      * |2|S|0|
@@ -179,41 +193,48 @@ float chebyshev(int sy, int sx, int dy, int dx ) {
 }
 
 void create_path(int id){
+
     int i = 0;
-    POINT* p = points_find(id);
-    while(p){
+    POINT* p = closed_find(id);
+    while(1){
         int sy = p->y;
         int sx = p->x;
-        printf("Testing %d%d parent=%d\n", sy,sx, p->parent->id);
-        if(i++ > 60)
+        printf("Testing %d%d parent=%d%d\n", sy,sx, p->parent->y, p->parent->x);
+        if((mapWidth * sy) + sx == START_NODE)
             break;
-        if((mapWidth * sy) + sx == END_NODE)
-            break;
-        p = p->parent;
+        p = closed_find(p->parent->id);
+        //p = p->parent;
+
     };
 }
 
 void search(int sy, int sx, int dy, int dx) {
-    int finished = 0;
     int start_node = (mapWidth * sy) + sx;
     int END_NODE = (mapWidth * dy) + dx;
+
+
 
     POINT* s_node = points_find(start_node);
     //printf("im searching for %d from %d\n", END_NODE, start_node);
 
     open_add(s_node);
     int successors[] = {-1, -1, -1, -1, -1, -1, -1, -1};
-    while(open_size() > 0 && finished == 0){
+    while(open_size() > 0){
 
         POINT* p = open_del();
         find_adj(p->y, p->x, successors);
 
-        int successor_count = 4;
+        int successor_count = 8;
         if (ALLOW_DIAGONAL)
             successor_count = 8;
 
-        //printf("Lowest found was: %d parent=%d \n ",
-                //p->id, p->parent ? p->parent->id : 0);
+        printf("Lowest found was: %d %d parent=%d %d \n ",
+                p->id, p->id,
+                p->parent ? (p->parent->id) : 0,
+                p->parent ? (p->parent->id) : 0
+        );
+
+        closed_add(p);
 
         for(int i=0; i < successor_count; i++){
             POINT* successor;
@@ -231,19 +252,23 @@ void search(int sy, int sx, int dy, int dx) {
             successor->gcost = gcost;
             successor->parent = p;
 
-            //printf("Gcost = %d \n",gcost);
-            //printf("\tFcost=%d for node=%d%d parent=%d\n", successor->fcost, sy, sx, successor->parent->id);
-            
-            int tmp_fcost = open_search(successor);
-            if (tmp_fcost) {
-                if (tmp_fcost < successor->fcost)
+            POINT *tmp = open_search(successor->id);
+            if (tmp) {
+
+                if (tmp->fcost < successor->fcost)
+                    continue;
+            }
+
+            tmp = closed_find(successor->id);
+            if (tmp) {
+
+                if(tmp->fcost < successor->fcost)
                     continue;
             }
 
             open_add(successor);
         }
 
-        closed_add(p);
         memset(successors, -1, sizeof(successors));
 
         if (( mapWidth * p->y ) + p->x == END_NODE ){
@@ -251,9 +276,9 @@ void search(int sy, int sx, int dy, int dx) {
         }
     }
 
-    create_path(start_node);
     open_destroy();
     printf("Finished :)\n");
+    create_path(END_NODE);
 }
 
 void load_map(char* mapfile){
@@ -283,8 +308,6 @@ void load_map(char* mapfile){
     }
 }
 
-
-        
 int main() {
     //load_map("maze512-16-0.map");
     add_items(3,3,18,18);

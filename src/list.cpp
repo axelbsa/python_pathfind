@@ -44,6 +44,16 @@ static POINT* search(POINT** list, size_t size, int id) {
     return NULL;
 }
 
+static POINT* c_search(POINT** list, size_t size, int id) {
+    for (size_t i = 0; i < size; ++i) {
+        if (list[i]->id == id) {
+            return list[i];
+        }
+    }
+
+    return NULL;
+}
+
 POINT* points_add(POINT* point) {
     if (points == NULL) {
         points = (POINT**) malloc(sizeof(POINT*) * points_size_max);
@@ -63,6 +73,10 @@ POINT* points_add(POINT* point) {
 
 POINT* points_find(int id) {
     return search(points, points_size, id);
+}
+
+POINT* closed_find(int id) {
+    return search(closed, closed_size, id);
 }
 
 void points_destroy() {
