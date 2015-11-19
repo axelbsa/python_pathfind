@@ -215,8 +215,6 @@ void search(int sy, int sx, int dy, int dx) {
     int start_node = (mapWidth * sy) + sx;
     int END_NODE = (mapWidth * dy) + dx;
 
-
-
     POINT* s_node = points_find(start_node);
     //printf("im searching for %d from %d\n", END_NODE, start_node);
 
@@ -256,19 +254,19 @@ void search(int sy, int sx, int dy, int dx) {
             successor->gcost = gcost;
             successor->parent = p;
 
-            POINT *tmp = open_search(successor->id);
-            if (tmp) {
+            //POINT *tmp = open_search(successor->id);
+            //if (tmp) {
 
-                if (tmp->fcost < successor->fcost)
-                    continue;
-            }
+                //if (tmp->fcost < successor->fcost)
+                    //continue;
+            //}
 
-            tmp = closed_find(successor->id);
-            if (tmp) {
+            //tmp = closed_find(successor->id);
+            //if (tmp) {
 
-                if(tmp->fcost < successor->fcost)
-                    continue;
-            }
+                //if(tmp->fcost < successor->fcost)
+                    //continue;
+            //}
 
             open_add(successor);
         }
