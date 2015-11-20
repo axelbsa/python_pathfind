@@ -258,7 +258,7 @@ void search(int sy, int sx, int dy, int dx) {
             int gcost = successor->gcost;
 
             gcost += 14 * lut[path[sy][sx]];
-            printf("LUT %d\n",lut[path[sy][sx]] );
+            //printf("LUT %d\n",lut[path[sy][sx]] );
             successor->fcost = chebyshev(sy, sx, dy, dx) + gcost;
 
             successor->gcost = gcost;
@@ -332,8 +332,8 @@ int main() {
     lut['.'] = 1;
 
     load_map("maze512-16-0.map");
-    add_items(3,3,25,67);
-    search(3,3,25,67);
+    add_items(3,3,511,511);
+    search(3,3,511,511);
     points_destroy();
 
     for (int i=0; i<mapHeight; i++) {
