@@ -204,11 +204,11 @@ void create_path(POINT* p){
         int sy = p->y;
         int sx = p->x;
         path[sy][sx] = 'X';
-        printf("(%d,%d)\n", 
-                sy,sx, 
-                p->parent ? p->parent->x : 0,
-                p->parent ? p->parent->y : 0
-        );
+        //printf("(%d,%d)\n", 
+                //sy,sx, 
+                //p->parent ? p->parent->x : 0,
+                //p->parent ? p->parent->y : 0
+        //);
         p = p->parent;
 
     };
@@ -258,6 +258,7 @@ void search(int sy, int sx, int dy, int dx) {
             int gcost = successor->gcost;
 
             gcost += 14 * lut[path[sy][sx]];
+            printf("LUT %d\n",lut[path[sy][sx]] );
             successor->fcost = chebyshev(sy, sx, dy, dx) + gcost;
 
             successor->gcost = gcost;
@@ -326,10 +327,9 @@ void load_map(char* mapfile){
 }
 
 int main() {
-    lut[63] = 999;
-    lut[64] = 999;
-    lut[46] = 1;
-    lut[47] = 1;
+    memset(lut, 1, sizeof(int) * 200);
+    lut['@'] = 999;
+    lut['.'] = 1;
 
     load_map("maze512-16-0.map");
     add_items(3,3,25,67);
@@ -337,13 +337,13 @@ int main() {
     points_destroy();
 
     
-    for (int i=0; i<mapHeight; i++) {
-        for (int j=0; j<mapWidth; j++ ){
+    //for (int i=0; i<mapHeight; i++) {
+        //for (int j=0; j<mapWidth; j++ ){
 
-            printf("%c ", path[i][j]);
-        }
-        printf("\n");
-    }
+            //printf("%c ", path[i][j]);
+        //}
+        //printf("\n");
+    //}
     
         
     return 0;
