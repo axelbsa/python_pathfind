@@ -329,8 +329,8 @@ int main() {
     lut['.'] = 1;
 
     load_map("maze512-16-0.map");
-    add_items(3,3,511,511);
-    search(3,3,511,511);
+    add_items(3,3,200,69);
+    search(3,3,200,69);
     points_destroy();
 
     for (int i=0; i<mapHeight; i++) {
