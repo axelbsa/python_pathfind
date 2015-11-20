@@ -258,7 +258,6 @@ void search(int sy, int sx, int dy, int dx) {
             int gcost = successor->gcost;
 
             gcost += 14 * lut[path[sy][sx]];
-            //printf("LUT %d\n",lut[path[sy][sx]] );
             successor->fcost = chebyshev(sy, sx, dy, dx) + gcost;
 
             successor->gcost = gcost;
@@ -299,9 +298,8 @@ end:
 
 }
 
-void load_map(char* mapfile){
-    int i = 0;
-    int j = 0;
+void load_map(const char* mapfile){
+    int idx = 0;
     FILE *fp;
     int ch;
     char mystring[100];
@@ -318,11 +316,10 @@ void load_map(char* mapfile){
     fgets (mystring , 100 , fp);
 
     while( ( ch = fgetc(fp) ) != EOF ){
-        if(j % 513 == 0){
-            j=0;
-            i++;
+        if (ch == '.' || ch == '@') {
+            path[idx / mapHeight][idx % mapWidth] = ch;
+            ++idx;
         }
-        path[i][j++] = ch;
     }
 }
 
@@ -338,8 +335,7 @@ int main() {
 
     for (int i=0; i<mapHeight; i++) {
         for (int j=0; j<mapWidth; j++ ){
-
-            printf("%c ", path[i][j]);
+            printf("%c", path[i][j]);
         }
         printf("\n");
     }
