@@ -20,6 +20,7 @@ int mapHeight = 512;
 
 int closed_size = 0;
 POINT* closed_list[MAX_MAP_SIZE];
+int lut[256];
 
 //A Bigger map for later testing
 int path[512][512];
@@ -46,7 +47,6 @@ int path[512][512];
     //{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 //};
 
-int lut[200];
 
 int START_NODE = 0;
 int END_NODE = 0;
@@ -303,7 +303,7 @@ void load_map(char* mapfile){
     int i = 0;
     int j = 0;
     FILE *fp;
-    char ch;
+    int ch;
     char mystring[100];
     fp=fopen(mapfile, "r");
 
@@ -336,14 +336,13 @@ int main() {
     search(3,3,25,67);
     points_destroy();
 
-    
-    //for (int i=0; i<mapHeight; i++) {
-        //for (int j=0; j<mapWidth; j++ ){
+    for (int i=0; i<mapHeight; i++) {
+        for (int j=0; j<mapWidth; j++ ){
 
-            //printf("%c ", path[i][j]);
-        //}
-        //printf("\n");
-    //}
+            printf("%c ", path[i][j]);
+        }
+        printf("\n");
+    }
     
         
     return 0;
