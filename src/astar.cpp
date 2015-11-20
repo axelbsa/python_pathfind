@@ -258,7 +258,7 @@ void search(int sy, int sx, int dy, int dx) {
             int gcost = successor->gcost;
 
             gcost += 14 * lut[path[sy][sx]];
-            successor->fcost = chebyshev(sy, sx, dy, dx) + gcost;
+            successor->fcost = manhatten(sy, sx, dy, dx) + gcost;
 
             successor->gcost = gcost;
 
