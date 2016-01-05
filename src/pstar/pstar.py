@@ -4,7 +4,17 @@ import time
 
 from Queue import PriorityQueue
 
-D = 10
+D = 1.0
+infinity = 512000
+
+cost_lut = {}
+cost_lut['.'] = 1.0
+cost_lut['G'] = 1.0
+cost_lut['@'] = infinity
+cost_lut['O'] = infinity
+cost_lut['T'] = infinity
+cost_lut['S'] = 5.0
+cost_lut['W'] = 15.0
 
 def read_metadata(filename):
     with open(filename) as f:
@@ -12,102 +22,140 @@ def read_metadata(filename):
         height = int(f.readline().split()[1])
         width = int(f.readline().split()[1])
         f.readline()
-        s_map = [[0 for x in range(width+1)] for x in range(height+1)]
+        s_map = [[0 for x in range(width)] for y in range(height)]
         for i, line in enumerate(f):
             for j, char in enumerate(line):
+                if j == 512:
+                    break
                 s_map[i][j] = char
 
     return height, width, s_map
 
 
-def find_neighbours(uy, ux, width, height):
+def reconstruct(rev_path, current, s_map, start, end):
+    path = []
+    node = rev_path[current]
+    while node != 0:
+        path.append(node)
+        node = rev_path[node]
+    
+    return path
+
+def write_map(s_map, start, end, path):
+    with open("dump", 'w') as f:
+        for i, line in enumerate(s_map):
+            for j, char in enumerate(line):
+                point = (j * width) + i
+                point_found = 0
+                for x in path:
+                    if x == point:
+                        point_found = 1
+                if point == end:
+                    f.write('E')
+                elif point == start:
+                    f.write('S')
+                elif point_found:
+                    f.write('v')
+                else:
+                    f.write(s_map[i][j])
+            f.write("\n")
+
+
+def find_neighbours(ux, uy, width, height, neighbours):
     neighbour_count = 0
-    neighbours = [0 for x in range(4)]
+    #print "Finding neighbours x:%d y:%d" % (ux, uy)
 
     # find left and right neighbours
     if ux > 0:
-        neighbours[neighbour_count] = ux * width + (uy - 1)
+        neighbours[neighbour_count] = uy * width + (ux - 1)
         neighbour_count += 1
 
     if ux < width - 1:
-        neighbours[neighbour_count] = ux * width + (uy + 1)
+        neighbours[neighbour_count] = uy * width + (ux + 1)
         neighbour_count += 1
 
     if uy > 0:
-        neighbours[neighbour_count] = (ux - 1) * width + uy
+        neighbours[neighbour_count] = (uy - 1) * width + ux
         neighbour_count += 1
 
     if uy < height - 1:
-        neighbours[neighbour_count] = (ux + 1) * width + uy
+        neighbours[neighbour_count] = (uy + 1) * width + ux;
         neighbour_count += 1
-    return neighbours
+    
+    #print neighbours, neighbour_count
+    return neighbour_count
+
+def octile(sx, sy, dx, dy):
+    D2 = D
+    gx = abs(sx - dx)
+    gy = abs(sy - dy)
+    return D * (gx + gy) + (D2 - 2 * D) * min(gx, gy)
 
 
-def manhattan(sy, sx, dy, dx):
+def manhattan(sx, sy, dx, dy):
     gx = abs(sx - dx)
     gy = abs(sy - dy)
     return D * (gx + gy)
 
 
-def reconstruct(rev_path, current):
-    path = []
-    for test2 in rev_path.keys():
-        test = rev_path[test2]
-        path.append(test)
-
-    #print path
-    return path
-
-
-def search(s_map, sy, sx, dy, dx, start, end, g_cost, f_cost, height, width):
-    print "Start is %d" % start
+def search(s_map, sx, sy, dx, dy, start, end, g_cost, f_cost, height, width):
+    print height, width
+    closed_list = []
     open_list = PriorityQueue()
     open_list.put( (0, start) )
-    closed_list = [0 for x in range(width * height)]
     marked = [0 for x in range(width * height)]
-    rev_path = {}
+    rev_path = [0 for x in range(width * height)] 
+    neighbours = [0 for x in range(4)]
     g_cost[start] = 0
+    f_cost[start] = manhattan(sx, sy, dx, dy)
+    debug = 0
 
     while open_list.qsize():
         current = open_list.get()[1]
-
-        ux = current // width
-        uy = current % width
+        ux = current % width
+        uy = current // width
+        #print "Current node:%d x:%d y:%d" % (current, ux, uy)
 
         if current == end:
-            print "found path"
-            print "Current %d %d" % (uy, ux)
-            return reconstruct(rev_path ,current)
+            print "Path FOUND! current x:%d y:%d" % (ux, uy)
+            path = reconstruct(rev_path, current, s_map, start, end)
+            return path
 
-        closed_list[current] = 1
-        #print "Current y:%d x:%d" % (uy, ux)
+        closed_list.append(current)
 
-        for next_node in find_neighbours(uy, ux, width, height):
-            if closed_list[next_node] == 1:
-                continue
+        if current < 0:
+            debug = 1
 
-            vx = next_node // width
-            vy = next_node % width
+        neighbour_count = find_neighbours(ux, uy, width, height, neighbours)
+        for i in range(neighbour_count):
+            next_node = neighbours[i]
+            
+            vx = next_node % width
+            vy = next_node // width
 
-            #print "\tNext node y:%d x:%d" % (vy, vx)
-
-            tentative_score = g_cost[current] + 10
-
-            #print "\t\tG_cost: %d | tentative_cost: %d" % (g_cost[next_node],
-            #                                              tentative_score)
+            print "\tNext node x:%d y:%d" % (vx, vy)
+            
+            s_value = s_map[vx][vy]
+            lut = cost_lut[s_value]
+            tentative_score = g_cost[current] + (1.0 * lut)
+            if True:
+                print "\t\tG_cost: %d | tentative_cost: %d" % (g_cost[next_node], tentative_score)
 
             if marked[next_node] == 1:
                 continue
-            if tentative_score < g_cost[next_node]:
-
+            elif tentative_score < g_cost[next_node]:
                 rev_path[next_node] = current
                 g_cost[next_node] = tentative_score
-                man_cost = manhattan(vy, vx, dy, dx)
+                man_cost = manhattan(vx, vy, dx, dy)
+                man_cost = octile(vx, vy, dx, dy)
                 f_cost[next_node] = g_cost[next_node] + man_cost
-
                 open_list.put( (f_cost[next_node], next_node))
                 marked[next_node] = 1
-                #print "\t\tEnding f_cost: %d" % f_cost[next_node]
+                print "\t\tHeuristic: %d, Ending f_cost: %d" % (man_cost,
+                                                                f_cost[next_node])
+
+
+    return "FAIL"
 
 def usage():
     return "./program <mapfile> <start_y> <start_x> <end_y> <end_x>"
@@ -118,21 +166,25 @@ if __name__ == '__main__':
         sys.exit()
 
     filename = sys.argv[1]
-    sy = int(sys.argv[2])
-    sx = int(sys.argv[3])
-    dy = int(sys.argv[4])
-    dx = int(sys.argv[5])
+    sx = int(sys.argv[2])
+    sy = int(sys.argv[3])
+    dx = int(sys.argv[4])
+    dy = int(sys.argv[5])
 
     height, width, s_map = read_metadata(filename)
 
-    start = (sx * width) + sy
-    end = (dx * width) + dy
+    start = sx * width + sy
+    end = dx * width + dy
 
-    print "Finding path for y:%d x:%d" % (sy, sx)
+    print "Finding path for y:%d x:%d" % (dy, dx)
+    print "START: %d END:%d" % (start, end)
 
-    g_cost = [(width * height + 1) for x in range( (width + 1) * (height + 1) )]
-    f_cost = [(width * height + 1) for x in range( (width + 1) * (height + 1) )]
+    g_cost = [(width + height + 1) for x in range( (width + 1) * (height + 1) )]
+    f_cost = [(width + height + 1) for x in range( (width + 1) * (height + 1) )]
 
     start_tick = time.time()
-    path = search(s_map, sy, sx, dy, dx, start, end, g_cost, f_cost, height, width)
+    path = search(s_map, sx, sy, dx, dy, start, end, g_cost, f_cost, height, width)
     print "Time took, sec: %d" % (time.time() - start_tick)
+
+    write_map(s_map, start, end, path)
+#    print [("Y:%d X:%d") % (x//width,x%width) for x in path]
