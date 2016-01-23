@@ -188,7 +188,7 @@ int manhatten(int sy, int sx, int dy, int dx) {
 }
 
 float chebyshev(int sy, int sx, int dy, int dx ) {
-    float D = 14;
+    float D = 1.41;
     int tx = abs(sx - dx);
     int ty = abs(sy - dy);
     return D * (tx + ty) + (D*2 - 2 * D) * MIN(tx, ty);
@@ -257,7 +257,7 @@ void search(int sy, int sx, int dy, int dx) {
             int sy = successor->y;
             int gcost = successor->gcost;
 
-            gcost += 2 * lut[path[sy][sx]];
+            gcost += 1 * lut[path[sy][sx]];
             successor->fcost = manhatten(sy, sx, dy, dx) + gcost;
 
             successor->gcost = gcost;
@@ -270,12 +270,6 @@ void search(int sy, int sx, int dy, int dx) {
             //);
 
             POINT *tmp = open_search(successor->id);
-            if (tmp) {
-
-                if (tmp->fcost <= successor->fcost)
-                    continue;
-            }
-
             tmp = closed_find(successor->id);
             if (tmp) {
 
