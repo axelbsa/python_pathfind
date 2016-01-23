@@ -133,12 +133,12 @@ def search(s_map, sx, sy, dx, dy, start, end, g_cost, f_cost, height, width):
             vx = next_node % width
             vy = next_node // width
 
-            print "\tNext node x:%d y:%d" % (vx, vy)
+            #print "\tNext node x:%d y:%d" % (vx, vy)
             
             s_value = s_map[vx][vy]
             lut = cost_lut[s_value]
             tentative_score = g_cost[current] + (1.0 * lut)
-            if True:
+            if False:
                 print "\t\tG_cost: %d | tentative_cost: %d" % (g_cost[next_node], tentative_score)
 
             if marked[next_node] == 1:
@@ -151,8 +151,8 @@ def search(s_map, sx, sy, dx, dy, start, end, g_cost, f_cost, height, width):
                 f_cost[next_node] = g_cost[next_node] + man_cost
                 open_list.put( (f_cost[next_node], next_node))
                 marked[next_node] = 1
-                print "\t\tHeuristic: %d, Ending f_cost: %d" % (man_cost,
-                                                                f_cost[next_node])
+                #print "\t\tHeuristic: %d, Ending f_cost: %d" % (man_cost,
+                                                                #f_cost[next_node])
 
 
     return "FAIL"
@@ -182,9 +182,9 @@ if __name__ == '__main__':
     g_cost = [(width + height + 1) for x in range( (width + 1) * (height + 1) )]
     f_cost = [(width + height + 1) for x in range( (width + 1) * (height + 1) )]
 
-    start_tick = time.time()
+    start_tick = int(round(time.time()*1000))
     path = search(s_map, sx, sy, dx, dy, start, end, g_cost, f_cost, height, width)
-    print "Time took, sec: %d" % (time.time() - start_tick)
+    print "Time took, Msec: %d" % (int(round(time.time()*1000)) - start_tick)
 
     write_map(s_map, start, end, path)
 #    print [("Y:%d X:%d") % (x//width,x%width) for x in path]
