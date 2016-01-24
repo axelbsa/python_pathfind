@@ -28,10 +28,11 @@ int read_map(FILE* file, uint8_t* map, uint32_t width, uint32_t height)
 
         if (c == EOF)
         {
-            return 0;
+            printf("END OF FILE\n ");
+            //return 0;
         }
-
         map[i] = c & 255;
+        printf("%d ", map[i]);
     }
 
     return 1;
@@ -125,6 +126,25 @@ int read_metadata(FILE* file, uint32_t* width, uint32_t* height)
     return !!(status & 3);
 }
 
+uint32_t search(
+        const uint8_t* map, uint32_t width, uint32_t height, 
+        double* cost_lut, uint32_t* rev_path, double* f_costs, double* g_costs,
+        uint32_t* open_list, uint8_t* closed_list,
+        uint32_t start, uint32_t target
+        )
+{
+    return 2;
+
+}
+
+void free_all(double* a, uint8_t* b,uint32_t* c, double* d, double* e) {
+    free(a);
+    free(b);
+    free(c);
+    free(d);
+    free(e);
+}
+
 int main(int argc, char** argv)
 {
     long coordinates[4] = {-1, -1, -1, -1};
@@ -183,6 +203,28 @@ int main(int argc, char** argv)
     double* f_costs = (double*) calloc(1, sizeof(double) * 256);
     double* g_costs = (double*) calloc(1, sizeof(double) * 133);
 
-    printf("%d size", sizeof(uint32_t));
+    uint32_t* olist = (uint32_t*) calloc(-1, (sizeof(double) * 256) + map_size);
+    uint8_t* clist = (uint8_t*) calloc(-1, (size_t)olist + map_size + 1);
+
+    printf("%d size\n", sizeof(uint32_t));
+
+    // Parse map file
+    if (!read_map(file, map, width, height))
+    {
+        free_all(cost_lut, map, path_tbl, f_costs, g_costs);
+        fclose(file);
+        fprintf(stderr, "Couldn't parse map '%s'\n", argv[5]);
+        return 1;
+    }
+
+    fclose(file);
+
+    // Make a cost look-up table
+    //set_cost_lut(cost_lut, width * height + 1);
+
+    uint32_t start = coordinates[1] * width + coordinates[0];
+    uint32_t target = coordinates[3] * width + coordinates[2];
+    uint32_t exit_point = search(map, width, height, cost_lut, path_tbl, f_costs, g_costs, olist, clist, start, target);
+    fprintf(stderr, "Exit node '%d'\n", exit_point);
      
 }
