@@ -133,16 +133,24 @@ uint32_t search(
         uint32_t start, uint32_t target
         )
 {
-    return 2;
+    printf("w:%d h:%d start:%d end:%d\n", width, height, start, target);
+    uint32_t open_list_size = 0;
+    heap_insert(open_list, &open_list_size, f_costs, start);
+    return 12;
 
 }
 
-void free_all(double* a, uint8_t* b,uint32_t* c, double* d, double* e) {
+void free_all(double* a, uint8_t* b,
+              uint32_t* c, double* d, 
+              double* e, uint32_t* f,
+              uint8_t* g) {
     free(a);
     free(b);
     free(c);
     free(d);
     free(e);
+    free(f);
+    free(g);
 }
 
 int main(int argc, char** argv)
@@ -211,17 +219,19 @@ int main(int argc, char** argv)
     // Parse map file
     if (!read_map(file, map, width, height))
     {
-        free_all(cost_lut, map, path_tbl, f_costs, g_costs);
+        free_all(cost_lut, map, path_tbl, f_costs, g_costs, olist, clist);
         fclose(file);
         fprintf(stderr, "Couldn't parse map '%s'\n", argv[5]);
         return 1;
     }
 
     fclose(file);
+    for(int i=0; i<4; i++){
+        printf("Coords: %d\n", (int)coordinates[i]);
+    }
 
     // Make a cost look-up table
     //set_cost_lut(cost_lut, width * height + 1);
-
     uint32_t start = coordinates[1] * width + coordinates[0];
     uint32_t target = coordinates[3] * width + coordinates[2];
     uint32_t exit_point = search(map, width, height, cost_lut, path_tbl, f_costs, g_costs, olist, clist, start, target);
