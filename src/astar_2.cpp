@@ -5,6 +5,7 @@
 #include <math.h>
 
 #define D 1.0 
+
 inline int valid(int c)
 {
     const char* obstacles = ".G@OTSW";
@@ -32,7 +33,7 @@ int read_map(FILE* file, uint8_t* map, uint32_t width, uint32_t height)
             //return 0;
         }
         map[i] = c & 255;
-        printf("%d ", map[i]);
+        //printf("%d ", map[i]);
     }
 
     return 1;
@@ -126,6 +127,71 @@ int read_metadata(FILE* file, uint32_t* width, uint32_t* height)
     return !!(status & 3);
 }
 
+uint32_t manhattan(double sx, double sy,
+                   double dx, double dy)
+{
+    uint32_t gx = abs(sx - dx);
+    uint32_t gy = abs(sy - dy);
+    return (uint32_t)(D * (gx + gy));
+
+}
+
+uint32_t find_neighbours(int ux, int uy, int width, int height, uint32_t* neighbours, int num_neighbours = 8){
+ 
+    //void find_adj(int sy, int sx, int* successors){
+
+    /* Representation of adjecent nodes
+     * +-----+
+     * |7|3|4|
+     * |2|S|0|
+     * |6|1|5|
+     * +-----+
+     */
+    
+    // XXX Check that this actually has correct vals for 1D array and stuff
+    uint32_t start_node;
+    for(uint32_t i = 0; i < num_neighbours; i++){
+
+        start_node = 0;
+
+        switch(i) {
+            case 0:
+                start_node = (width * uy) + ux + 1;
+                break;
+
+            case 1:
+                start_node = (width * (uy + 1)) + ux;
+                break;
+
+            case 2:
+                start_node = (width * uy) + ux - 1;
+                break;
+
+            case 3:
+                start_node = (width * (uy - 1)) + ux;
+                break;
+
+            case 4:
+                start_node = (width * (uy - 1)) + ux + 1;
+                break;
+
+            case 5:
+                start_node = (width * (uy + 1)) + ux + 1;
+                break;
+
+            case 6:
+                start_node = (width * (uy + 1)) + ux - 1;
+                break;
+
+            case 7:
+                start_node = (width * (uy - 1)) + ux - 1;
+                break;
+        }
+    }
+
+    return num_neighbours;
+}
+
 uint32_t search(
         const uint8_t* map, uint32_t width, uint32_t height, 
         double* cost_lut, uint32_t* rev_path, double* f_costs, double* g_costs,
@@ -134,10 +200,37 @@ uint32_t search(
         )
 {
     printf("w:%d h:%d start:%d end:%d\n", width, height, start, target);
+    
+    uint32_t neighbours[8];
     uint32_t open_list_size = 0;
-    heap_insert(open_list, &open_list_size, f_costs, start);
-    return 12;
 
+    g_costs[start] = 0; 
+    f_costs[start] = 0; 
+
+    heap_insert(open_list, &open_list_size, f_costs, start);
+
+    while (open_list_size > 0) {
+
+        uint32_t current = heap_remove(open_list, &open_list_size, f_costs);
+        uint32_t ux = current % width;
+        uint32_t uy = current / width;
+        printf("X:%d Y:%d\n", ux, uy);
+
+        // check if u is our target
+        if (current == target) {
+            //uint32_t* path = reconstruct();
+            //return path;
+            return 0;
+        }
+
+        closed_list[current] = 1;
+        uint32_t neighbour_count = find_neighbours(ux, uy, width, height, neighbours);
+
+    
+    }
+
+
+    return 12;
 }
 
 void free_all(double* a, uint8_t* b,
@@ -206,13 +299,16 @@ int main(int argc, char** argv)
     double* cost_lut = (double*) calloc(1, sizeof(double) * 256);
 
     uint8_t* map = (uint8_t*) malloc(sizeof(uint8_t) * map_size);
-    uint32_t* path_tbl = (uint32_t*) calloc(1, sizeof(uint32_t) * map_size);
+    uint32_t* path_tbl = (uint32_t*) malloc(sizeof(uint32_t) * map_size);
 
-    double* f_costs = (double*) calloc(1, sizeof(double) * 256);
-    double* g_costs = (double*) calloc(1, sizeof(double) * 133);
+    double* f_costs = (double*) malloc(sizeof(double) * map_size);
+    double* g_costs = (double*) malloc(sizeof(double) * map_size);
 
-    uint32_t* olist = (uint32_t*) calloc(-1, (sizeof(double) * 256) + map_size);
-    uint8_t* clist = (uint8_t*) calloc(-1, (size_t)olist + map_size + 1);
+    uint32_t* olist = (uint32_t*) malloc(sizeof(uint32_t) * map_size * 8);
+    uint8_t* clist = (uint8_t*) malloc(sizeof(uint32_t) * map_size);
+
+    memset(olist, map_size, sizeof(uint32_t) * map_size * 8);
+    memset(clist, -1, sizeof(uint8_t) * map_size);
 
     printf("%d size\n", sizeof(uint32_t));
 

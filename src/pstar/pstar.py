@@ -100,14 +100,18 @@ def manhattan(sx, sy, dx, dy):
 
 def search(s_map, sx, sy, dx, dy, start, end, g_cost, f_cost, height, width):
     print height, width
+
+    # rev_path become closed_list somehow??? and marked???
     closed_list = []
+
+    map_size = width * height
     open_list = PriorityQueue()
     open_list.put( (0, start) )
-    marked = [0 for x in range(width * height)]
-    rev_path = [0 for x in range(width * height)] 
+    marked = [0] * map_size 
+    rev_path = [0] * map_size
     neighbours = [0 for x in range(4)]
     g_cost[start] = 0
-    f_cost[start] = manhattan(sx, sy, dx, dy)
+    f_cost[start] = 0 #manhattan(sx, sy, dx, dy)
     debug = 0
 
     while open_list.qsize():
@@ -117,11 +121,12 @@ def search(s_map, sx, sy, dx, dy, start, end, g_cost, f_cost, height, width):
         #print "Current node:%d x:%d y:%d" % (current, ux, uy)
 
         if current == end:
-            print "Path FOUND! current x:%d y:%d" % (ux, uy)
+            print "Path FOUND! current y:%d x:%d" % (ux, uy)
             path = reconstruct(rev_path, current, s_map, start, end)
             return path
 
         closed_list.append(current)
+        marked[current] = 1
 
         if current < 0:
             debug = 1
