@@ -149,6 +149,7 @@ uint32_t find_neighbours(int ux, int uy, int width, int height, uint32_t* neighb
      */
     
     // XXX Check that this actually has correct vals for 1D array and stuff
+    // XXX Also do boundry check
     uint32_t start_node;
     for(uint32_t i = 0; i < num_neighbours; i++){
 
@@ -202,6 +203,9 @@ uint32_t search(
         )
 {
     printf("w:%d h:%d start:%d end:%d\n", width, height, start, target);
+
+    cost_lut['.'] = 1;
+    cost_lut['@'] = 9999;
     
     uint32_t neighbours[8];
     uint32_t open_list_size = 0;
@@ -228,16 +232,24 @@ uint32_t search(
         closed_list[current] = 1;
         uint32_t neighbour_count = find_neighbours(ux, uy, width, height, neighbours);
         for(uint32_t i = 0; i < neighbour_count; i++ ) {
-            uint32_t current = neighbours[i];
+            uint32_t next_node = neighbours[i];
 
-            uint32_t vx = current % width;
-            uint32_t vy = current / width;
+            uint32_t vx = next_node % width;
+            uint32_t vy = next_node / width;
 
-            uint8_t s_value = map[current];
-        
+            uint32_t lut = cost_lut[map[next_node]];
+            uint32_t tentative_score = g_costs[current] + (1.0 * lut);
+
+            if (closed_list[next_node] == 1) {
+                continue; 
+            }else if (tentative_score < g_costs[next_node]) {
+                rev_path[next_node] = current;
+                g_costs[next_node] = tentative_score;
+            
+            }
         }
 
-    
+
     }
 
 

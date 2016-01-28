@@ -81,9 +81,10 @@ def find_neighbours(ux, uy, width, height, neighbours):
     if uy < height - 1:
         neighbours[neighbour_count] = (uy + 1) * width + ux;
         neighbour_count += 1
-    
-    #print neighbours, neighbour_count
+
+    # print neighbours, neighbour_count
     return neighbour_count
+
 
 def octile(sx, sy, dx, dy):
     D2 = D
@@ -106,19 +107,19 @@ def search(s_map, sx, sy, dx, dy, start, end, g_cost, f_cost, height, width):
 
     map_size = width * height
     open_list = PriorityQueue()
-    open_list.put( (0, start) )
-    marked = [0] * map_size 
+    open_list.put((0, start))
+    marked = [0] * map_size
     rev_path = [0] * map_size
     neighbours = [0 for x in range(4)]
     g_cost[start] = 0
-    f_cost[start] = 0 #manhattan(sx, sy, dx, dy)
+    f_cost[start] = 0  # manhattan(sx, sy, dx, dy)
     debug = 0
 
     while open_list.qsize():
         current = open_list.get()[1]
         ux = current % width
         uy = current // width
-        #print "Current node:%d x:%d y:%d" % (current, ux, uy)
+        # print "Current node:%d x:%d y:%d" % (current, ux, uy)
 
         if current == end:
             print "Path FOUND! current y:%d x:%d" % (ux, uy)
@@ -134,12 +135,12 @@ def search(s_map, sx, sy, dx, dy, start, end, g_cost, f_cost, height, width):
         neighbour_count = find_neighbours(ux, uy, width, height, neighbours)
         for i in range(neighbour_count):
             next_node = neighbours[i]
-            
+
             vx = next_node % width
             vy = next_node // width
 
-            #print "\tNext node x:%d y:%d" % (vx, vy)
-            
+            # print "\tNext node x:%d y:%d" % (vx, vy)
+
             s_value = s_map[vx][vy]
             lut = cost_lut[s_value]
             tentative_score = g_cost[current] + (1.0 * lut)
@@ -152,15 +153,15 @@ def search(s_map, sx, sy, dx, dy, start, end, g_cost, f_cost, height, width):
                 rev_path[next_node] = current
                 g_cost[next_node] = tentative_score
                 man_cost = manhattan(vx, vy, dx, dy)
-                man_cost = octile(vx, vy, dx, dy)
+                # man_cost = octile(vx, vy, dx, dy)
                 f_cost[next_node] = g_cost[next_node] + man_cost
-                open_list.put( (f_cost[next_node], next_node))
+                open_list.put((f_cost[next_node], next_node))
                 marked[next_node] = 1
-                #print "\t\tHeuristic: %d, Ending f_cost: %d" % (man_cost,
-                                                                #f_cost[next_node])
-
+                # print "\t\tHeuristic: %d, Ending f_cost: %d" % (man_cost,
+                                                                  # f_cost[next_node])
 
     return "FAIL"
+
 
 def usage():
     return "./program <mapfile> <start_y> <start_x> <end_y> <end_x>"
