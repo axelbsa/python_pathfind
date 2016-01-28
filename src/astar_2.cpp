@@ -187,6 +187,8 @@ uint32_t find_neighbours(int ux, int uy, int width, int height, uint32_t* neighb
                 start_node = (width * (uy - 1)) + ux - 1;
                 break;
         }
+        neighbours[i] = start_node;
+
     }
 
     return num_neighbours;
@@ -225,6 +227,15 @@ uint32_t search(
 
         closed_list[current] = 1;
         uint32_t neighbour_count = find_neighbours(ux, uy, width, height, neighbours);
+        for(uint32_t i = 0; i < neighbour_count; i++ ) {
+            uint32_t current = neighbours[i];
+
+            uint32_t vx = current % width;
+            uint32_t vy = current / width;
+
+            uint8_t s_value = map[current];
+        
+        }
 
     
     }
