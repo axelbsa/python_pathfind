@@ -29,7 +29,6 @@ int read_map(FILE* file, uint8_t* map, uint32_t width, uint32_t height)
 
         if (c == EOF)
         {
-            printf("END OF FILE\n ");
             //return 0;
         }
         map[i] = c & 255;
@@ -195,6 +194,16 @@ uint32_t find_neighbours(int ux, int uy, int width, int height, uint32_t* neighb
     return num_neighbours;
 }
 
+
+uint32_t* reconstruct(uint32_t* rev_path, uint32_t current):
+    path = []
+    node = rev_path[current]
+    while node != 0:
+        path.append(node)
+        node = rev_path[node]
+    
+    return path
+
 uint32_t search(
         const uint8_t* map, uint32_t width, uint32_t height, 
         double* cost_lut, uint32_t* rev_path, double* f_costs, double* g_costs,
@@ -202,6 +211,12 @@ uint32_t search(
         uint32_t start, uint32_t target
         )
 {
+    // Init arrys
+    for (int i = 0; i < width * height; i++) {
+        g_costs[i] = width * height + 1;
+        f_costs[i] = width * height + 1;
+    }
+
     printf("w:%d h:%d start:%d end:%d\n", width, height, start, target);
 
     cost_lut['.'] = 1;
@@ -209,6 +224,9 @@ uint32_t search(
     
     uint32_t neighbours[8];
     uint32_t open_list_size = 0;
+
+    uint32_t tx = target % width;
+    uint32_t ty = target / width;
 
     g_costs[start] = 0; 
     f_costs[start] = 0; 
@@ -220,33 +238,41 @@ uint32_t search(
         uint32_t current = heap_remove(open_list, &open_list_size, f_costs);
         uint32_t ux = current % width;
         uint32_t uy = current / width;
-        printf("X:%d Y:%d\n", ux, uy);
 
         // check if u is our target
         if (current == target) {
             //uint32_t* path = reconstruct();
             //return path;
-            return 0;
+            printf("PATH FOUND\n");
+            return current;
         }
 
         closed_list[current] = 1;
         uint32_t neighbour_count = find_neighbours(ux, uy, width, height, neighbours);
         for(uint32_t i = 0; i < neighbour_count; i++ ) {
             uint32_t next_node = neighbours[i];
-
             uint32_t vx = next_node % width;
             uint32_t vy = next_node / width;
 
             uint32_t lut = cost_lut[map[next_node]];
-            uint32_t tentative_score = g_costs[current] + (1.0 * lut);
+            uint32_t tentative_score = (g_costs[current] + (lut));
+#ifdef DEBUG
+            printf("\tNeighbour X:%d Y:%d\n", vx, vy);
+            printf("\tNode score: %d + %d = %d\n", lut, g_costs[current], tentative_score);
+            printf("\t Gcost_next: %d \n", g_costs[next_node]);
+            printf("\t tentative_score: %d \n", tentative_score);
+#endif
 
             if (closed_list[next_node] == 1) {
                 continue; 
-            }else if (tentative_score < g_costs[next_node]) {
+            }else if (tentative_score <= g_costs[next_node]) {
                 rev_path[next_node] = current;
                 g_costs[next_node] = tentative_score;
+                uint32_t man_costs = manhattan(vx, vy, tx, ty);
+                f_costs[next_node] = g_costs[next_node] + man_costs;
+                heap_insert(open_list, &open_list_size, f_costs, next_node);
             
-            }
+            }else{ /* If you end up here, you are lost */}
         }
 
 
@@ -260,12 +286,9 @@ void free_all(double* a, uint8_t* b,
               uint32_t* c, double* d, 
               double* e, uint32_t* f,
               uint8_t* g) {
-    free(a);
-    free(b);
-    free(c);
-    free(d);
-    free(e);
-    free(f);
+
+    free(a); free(b); free(c);
+    free(d); free(e); free(f);
     free(g);
 }
 
@@ -333,8 +356,6 @@ int main(int argc, char** argv)
     memset(olist, map_size, sizeof(uint32_t) * map_size * 8);
     memset(clist, -1, sizeof(uint8_t) * map_size);
 
-    printf("%d size\n", sizeof(uint32_t));
-
     // Parse map file
     if (!read_map(file, map, width, height))
     {
@@ -345,9 +366,6 @@ int main(int argc, char** argv)
     }
 
     fclose(file);
-    for(int i=0; i<4; i++){
-        printf("Coords: %d\n", (int)coordinates[i]);
-    }
 
     // Make a cost look-up table
     //set_cost_lut(cost_lut, width * height + 1);
