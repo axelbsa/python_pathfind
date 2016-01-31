@@ -5,6 +5,7 @@
 #include <math.h>
 
 #define D 1.0 
+#define infinity 512000
 
 inline int valid(int c)
 {
@@ -135,7 +136,7 @@ uint32_t manhattan(double sx, double sy,
 
 }
 
-uint32_t find_neighbours(int ux, int uy, int width, int height, uint32_t* neighbours, int num_neighbours = 8){
+uint32_t find_neighbours(int ux, int uy, int width, int height, uint32_t* neighbours, uint32_t num_neighbours = 8){
  
     //void find_adj(int sy, int sx, int* successors){
 
@@ -156,19 +157,23 @@ uint32_t find_neighbours(int ux, int uy, int width, int height, uint32_t* neighb
 
         switch(i) {
             case 0:
-                start_node = (width * uy) + ux + 1;
+                if (ux < width - 1)
+                    start_node = (width * uy) + ux + 1;
                 break;
 
             case 1:
-                start_node = (width * (uy + 1)) + ux;
+                if (uy < height - 1)
+                    start_node = (width * (uy + 1)) + ux;
                 break;
 
             case 2:
-                start_node = (width * uy) + ux - 1;
+                if (ux > 0)
+                    start_node = (width * uy) + ux - 1;
                 break;
 
             case 3:
-                start_node = (width * (uy - 1)) + ux;
+                if (uy > 0)
+                    start_node = (width * (uy - 1)) + ux;
                 break;
 
             case 4:
@@ -195,14 +200,20 @@ uint32_t find_neighbours(int ux, int uy, int width, int height, uint32_t* neighb
 }
 
 
-uint32_t* reconstruct(uint32_t* rev_path, uint32_t current):
-    path = []
-    node = rev_path[current]
-    while node != 0:
-        path.append(node)
-        node = rev_path[node]
-    
-    return path
+uint32_t reconstruct(uint32_t* rev_path, uint32_t* path, uint32_t current, uint32_t width)
+{
+    uint32_t path_size = 0;
+    uint32_t node = rev_path[current];
+
+    while (node != 0) {
+        //printf("Node: x=%d, y=%d\n", node % width, node / width);
+        //path.append(node);
+        path[path_size++] = node;
+        node = rev_path[node];
+    }
+
+    return path_size;
+}
 
 uint32_t search(
         const uint8_t* map, uint32_t width, uint32_t height, 
@@ -212,16 +223,27 @@ uint32_t search(
         )
 {
     // Init arrys
-    for (int i = 0; i < width * height; i++) {
-        g_costs[i] = width * height + 1;
-        f_costs[i] = width * height + 1;
+    for (uint32_t i = 0; i < width * height; i++) {
+        g_costs[i] = width * height + 1.0;
+        f_costs[i] = width * height + 1.0;
     }
 
     printf("w:%d h:%d start:%d end:%d\n", width, height, start, target);
 
-    cost_lut['.'] = 1;
-    cost_lut['@'] = 9999;
-    
+    cost_lut['.'] = 1.0;
+    cost_lut['G'] = 1.0;
+    cost_lut['@'] = infinity;
+    cost_lut['O'] = infinity;
+    cost_lut['T'] = infinity;
+    cost_lut['S'] = 5.0;
+    cost_lut['W'] = 15.0;
+
+    if (cost_lut[map[target]] == infinity) {
+        printf("YOU ARE TRYING TO GET INSIDE A WALL!\n");
+        return 0x0;
+    }
+
+
     uint32_t neighbours[8];
     uint32_t open_list_size = 0;
 
@@ -241,45 +263,79 @@ uint32_t search(
 
         // check if u is our target
         if (current == target) {
-            //uint32_t* path = reconstruct();
-            //return path;
-            printf("PATH FOUND\n");
-            return current;
+            uint32_t path[height * width];
+            uint32_t path_size = reconstruct(rev_path, path, current, width);
+            int mark = 0;
+            for (uint32_t i = 0; i < width * height; i++) {
+
+                if((i % width) == 0) 
+                    printf("\n");
+
+                for (uint32_t y = 0; y < path_size; y++) {
+                    if (path[y] == i) {
+                        mark = 1;
+                    } 
+                }
+                if (mark)
+                    printf("V");
+                else
+                    printf("%c",map[i]);
+                mark = 0;
+
+            }
+            return *path;
+            //return current;
         }
 
+#ifdef DEBUG
+        printf("Olist_size=%d Neighbour X:%d Y:%d node:%d\n", open_list_size, ux, uy, current);
+#endif
+
         closed_list[current] = 1;
-        uint32_t neighbour_count = find_neighbours(ux, uy, width, height, neighbours);
+
+        uint32_t neighbour_count = find_neighbours(ux, uy, width, height, neighbours, 8);
         for(uint32_t i = 0; i < neighbour_count; i++ ) {
             uint32_t next_node = neighbours[i];
             uint32_t vx = next_node % width;
             uint32_t vy = next_node / width;
 
-            uint32_t lut = cost_lut[map[next_node]];
-            uint32_t tentative_score = (g_costs[current] + (lut));
+            // XXX Problem starts here! something wrong with the sizes
+            uint8_t map_node = map[next_node];
+            double lut = cost_lut[map_node];
+
+
+            double movement_cost = 1.0;
+            if (i > 3)
+                movement_cost = 1.42;
+
+            //g_costs[next_node] = g_costs[current] + movement_cost;
+
+            // XXX Problem is lut!! giving wrong value
+            double tentative_score = (g_costs[current] + lut + movement_cost);
+
 #ifdef DEBUG
             printf("\tNeighbour X:%d Y:%d\n", vx, vy);
-            printf("\tNode score: %d + %d = %d\n", lut, g_costs[current], tentative_score);
-            printf("\t Gcost_next: %d \n", g_costs[next_node]);
-            printf("\t tentative_score: %d \n", tentative_score);
+            printf("\tNode score: %g + %g = %g\n", lut, g_costs[current], tentative_score);
+            printf("\t Gcost_next: %g \n", g_costs[next_node]);
+            printf("\t tentative_score: %g \n", tentative_score);
 #endif
 
-            if (closed_list[next_node] == 1) {
+            if (closed_list[next_node] == 1.0) {
                 continue; 
-            }else if (tentative_score <= g_costs[next_node]) {
+            }else if (tentative_score < g_costs[next_node]) {
                 rev_path[next_node] = current;
                 g_costs[next_node] = tentative_score;
                 uint32_t man_costs = manhattan(vx, vy, tx, ty);
                 f_costs[next_node] = g_costs[next_node] + man_costs;
                 heap_insert(open_list, &open_list_size, f_costs, next_node);
-            
+
             }else{ /* If you end up here, you are lost */}
         }
-
 
     }
 
 
-    return 12;
+    return 0x0;
 }
 
 void free_all(double* a, uint8_t* b,
@@ -340,19 +396,25 @@ int main(int argc, char** argv)
         fprintf(stderr, "(%ld,%ld) is not a point in the map!\n", coordinates[0], coordinates[1]);
         return EXIT_FAILURE;
     }
-    
-    size_t map_size = width * height;
-    double* cost_lut = (double*) calloc(1, sizeof(double) * 256);
 
-    uint8_t* map = (uint8_t*) malloc(sizeof(uint8_t) * map_size);
+    size_t map_size = width * height;
+    double* cost_lut = (double*) malloc(sizeof(double) * 256);
+
+    uint8_t* map = (uint8_t*) malloc(sizeof(uint8_t) * map_size * 2);
     uint32_t* path_tbl = (uint32_t*) malloc(sizeof(uint32_t) * map_size);
 
-    double* f_costs = (double*) malloc(sizeof(double) * map_size);
-    double* g_costs = (double*) malloc(sizeof(double) * map_size);
+    double* f_costs = (double*) malloc(sizeof(double) * map_size * 8);
+    double* g_costs = (double*) malloc(sizeof(double) * map_size * 8);
 
     uint32_t* olist = (uint32_t*) malloc(sizeof(uint32_t) * map_size * 8);
     uint8_t* clist = (uint8_t*) malloc(sizeof(uint32_t) * map_size);
 
+    memset(map, 1.0, sizeof(uint8_t) * map_size * 2);
+
+    memset(f_costs, map_size + 1, sizeof(double) * map_size * 8);
+    memset(g_costs, map_size + 1, sizeof(double) * map_size * 8);
+
+    memset(cost_lut, 1.0, sizeof(double) * 256);
     memset(olist, map_size, sizeof(uint32_t) * map_size * 8);
     memset(clist, -1, sizeof(uint8_t) * map_size);
 
@@ -372,6 +434,13 @@ int main(int argc, char** argv)
     uint32_t start = coordinates[1] * width + coordinates[0];
     uint32_t target = coordinates[3] * width + coordinates[2];
     uint32_t exit_point = search(map, width, height, cost_lut, path_tbl, f_costs, g_costs, olist, clist, start, target);
-    fprintf(stderr, "Exit node '%d'\n", exit_point);
-     
+
+    if(exit_point) 
+        fprintf(stderr, "PATH FOUDN\n");
+    else
+        fprintf(stderr, "Error, could not find any path\n");
+
+
+    free_all(cost_lut, map, path_tbl, f_costs, g_costs, olist, clist);
+
 }
