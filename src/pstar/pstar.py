@@ -144,7 +144,7 @@ def search(s_map, sx, sy, dx, dy, start, end, g_cost, f_cost, height, width):
             s_value = s_map[vx][vy]
             lut = cost_lut[s_value]
             tentative_score = g_cost[current] + (1.0 * lut)
-            if True:
+            if False:
                 print "\t\tG_cost: %d | tentative_cost: %d" % (g_cost[next_node], tentative_score)
 
             if marked[next_node] == 1:

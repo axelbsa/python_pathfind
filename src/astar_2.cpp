@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <math.h>
 
 #define D 1.0 
@@ -26,11 +27,11 @@ int read_map(FILE* file, uint8_t* map, uint32_t width, uint32_t height)
     {
         int c;
 
-        while ((c = fgetc(file)) != EOF && !valid(c));
+        while ((c = fgetc(file)) != EOF && !valid(c)) {}
 
         if (c == EOF)
         {
-            //return 0;
+            return 0;
         }
         map[i] = c & 255;
         //printf("%d ", map[i]);
@@ -433,7 +434,12 @@ int main(int argc, char** argv)
     //set_cost_lut(cost_lut, width * height + 1);
     uint32_t start = coordinates[1] * width + coordinates[0];
     uint32_t target = coordinates[3] * width + coordinates[2];
+
+    clock_t t = clock();
     uint32_t exit_point = search(map, width, height, cost_lut, path_tbl, f_costs, g_costs, olist, clist, start, target);
+    
+    t = clock() - t;
+    fprintf(stderr, "It took me (%f seconds).\n",((float)t)/CLOCKS_PER_SEC);
 
     if(exit_point) 
         fprintf(stderr, "PATH FOUDN\n");
