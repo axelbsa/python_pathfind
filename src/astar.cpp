@@ -2,11 +2,21 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <string>
 #include <time.h>
 #include <math.h>
 
 #define D 1.0 
+#define NUDGE_FACTOR 0.001
+#define ALLOW_DIAGONAL 1
+
+#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+
 #define infinity 512000
+
+std::string test() {
+    return "A Simple Test";
+}
 
 inline int valid(int c)
 {
@@ -18,6 +28,8 @@ inline int valid(int c)
             return 1;
         }
     }
+
+    // ILLIGAL CHARACTER
     return 0;
 }
 
@@ -34,7 +46,7 @@ int read_map(FILE* file, uint8_t* map, uint32_t width, uint32_t height)
             return 0;
         }
         map[i] = c & 255;
-        //printf("%d ", map[i]);
+
     }
 
     return 1;
@@ -128,13 +140,38 @@ int read_metadata(FILE* file, uint32_t* width, uint32_t* height)
     return !!(status & 3);
 }
 
-uint32_t manhattan(double sx, double sy,
-                   double dx, double dy)
+
+uint32_t cross(uint32_t sx, uint32_t sy,
+               uint32_t cx, uint32_t cy,
+               uint32_t dx, uint32_t dy)
+{
+    uint32_t gx1 = sx - dx;
+    uint32_t gy1 = sy - dy;
+    
+    uint32_t gx2 = cx - dx;
+    uint32_t gy2 = cy - dy;
+
+    return abs(gx1 * gy2 - gx2 * gy1);
+}
+
+double octile_distance(uint32_t sx, uint32_t sy,
+                       uint32_t dx, uint32_t dy)
+{
+    double D2 = 1.414;
+    uint32_t gx = abs(sx - dx);
+    uint32_t gy = abs(sy - dy);
+
+    return D * (gx + gy) + (D2 - 2 * D) * MIN(gx, gy);
+}
+
+
+double manhattan(uint32_t sx, uint32_t sy,
+                 uint32_t dx, uint32_t dy)
 {
     uint32_t gx = abs(sx - dx);
     uint32_t gy = abs(sy - dy);
-    return (uint32_t)(D * (gx + gy));
 
+    return (D * (gx + gy));
 }
 
 uint32_t find_neighbours(int ux, int uy, int width, int height, uint32_t* neighbours, uint32_t num_neighbours = 8){
@@ -223,7 +260,16 @@ uint32_t search(
         uint32_t start, uint32_t target
         )
 {
-    // Init arrys
+
+    uint32_t neighbours[8];
+    uint32_t open_list_size = 0;
+
+    uint32_t sx = start % width;
+    uint32_t sy = start / width;
+
+    uint32_t tx = target % width;
+    uint32_t ty = target / width;
+
     for (uint32_t i = 0; i < width * height; i++) {
         g_costs[i] = width * height + 1.0;
         f_costs[i] = width * height + 1.0;
@@ -244,16 +290,15 @@ uint32_t search(
         return 0x0;
     }
 
+    double (*heuristic)(uint32_t, uint32_t, uint32_t, uint32_t);
+    
+    if (ALLOW_DIAGONAL) 
+        heuristic = &octile_distance;
+    else 
+        heuristic = &manhattan;
 
-    uint32_t neighbours[8];
-    uint32_t open_list_size = 0;
 
-    uint32_t tx = target % width;
-    uint32_t ty = target / width;
-
-    g_costs[start] = 0; 
-    f_costs[start] = 0; 
-
+    g_costs[start] = f_costs[start] = 0; 
     heap_insert(open_list, &open_list_size, f_costs, start);
 
     while (open_list_size > 0) {
@@ -291,8 +336,9 @@ uint32_t search(
 #ifdef DEBUG
         printf("Olist_size=%d Neighbour X:%d Y:%d node:%d\n", open_list_size, ux, uy, current);
 #endif
-
         closed_list[current] = 1;
+
+        uint32_t num = ALLOW_DIAGONAL ? 4 : 8;
 
         uint32_t neighbour_count = find_neighbours(ux, uy, width, height, neighbours, 8);
         for(uint32_t i = 0; i < neighbour_count; i++ ) {
@@ -300,18 +346,14 @@ uint32_t search(
             uint32_t vx = next_node % width;
             uint32_t vy = next_node / width;
 
-            // XXX Problem starts here! something wrong with the sizes
             uint8_t map_node = map[next_node];
             double lut = cost_lut[map_node];
 
-
             double movement_cost = 1.0;
-            if (i > 3)
-                movement_cost = 1.42;
+            if(i > 3)
+                movement_cost = 1.414; // If diagonal adjust the cost
 
             //g_costs[next_node] = g_costs[current] + movement_cost;
-
-            // XXX Problem is lut!! giving wrong value
             double tentative_score = (g_costs[current] + lut + movement_cost);
 
 #ifdef DEBUG
@@ -326,7 +368,12 @@ uint32_t search(
             }else if (tentative_score < g_costs[next_node]) {
                 rev_path[next_node] = current;
                 g_costs[next_node] = tentative_score;
-                uint32_t man_costs = manhattan(vx, vy, tx, ty);
+
+                //double man_costs = heuristic(vx, vy, tx, ty);
+                double man_costs = octile_distance(vx, vy, tx, ty);
+                //if(!ALLOW_DIAGONAL)
+                    //man_costs += cross(vx, vy, sx, sy, tx, ty) * NUDGE_FACTOR;
+                
                 f_costs[next_node] = g_costs[next_node] + man_costs;
                 heap_insert(open_list, &open_list_size, f_costs, next_node);
 
