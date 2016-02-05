@@ -37,7 +37,8 @@ static PyObject *Astar_set(Astar *self, PyObject *args)
 static PyObject *Astar_search(Astar *self, PyObject *args)
 {
     int sx, sy, dx, dy = 0;
-    int width, height, diagonal = 0;
+    int width, height = 1;
+    int diagonal = 0;
 
     PyObject *world;
 
@@ -52,6 +53,7 @@ static PyObject *Astar_search(Astar *self, PyObject *args)
 
     int i=0;
     uint32_t map[width * height];
+    memset(map, 0, sizeof(map));
     
     while (true) {
         PyObject *next = PyIter_Next(iter);
