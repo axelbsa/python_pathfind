@@ -476,7 +476,7 @@ int init(uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
     fprintf(stderr, "It took me (%f seconds).\n",((float)t)/CLOCKS_PER_SEC);
 
     if(exit_point) 
-        fprintf(stderr, "PATH FOUDN\n");
+        fprintf(stderr, "PATH FOUND\n");
     else
         fprintf(stderr, "Error, could not find any path\n");
 
