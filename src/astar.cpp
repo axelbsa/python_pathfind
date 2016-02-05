@@ -4,13 +4,13 @@
 #include <string.h>
 #include <string>
 #include <time.h>
-#include <math.h>
 
 #define D 1.0 
 #define NUDGE_FACTOR 0.001
 #define ALLOW_DIAGONAL 1
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+#define abs(x) ((x)<0 ? -(x) : (x))
 
 #define infinity 512000
 
