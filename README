@@ -8,3 +8,5 @@ or python-devel for fedora
 
 
 compile with: python setup.py build_ext -i
+
+test with: python aps.py src/maze512-16-0.map 11 11 455 455 > dump.txt
