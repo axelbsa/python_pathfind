@@ -52,7 +52,8 @@ static PyObject *Astar_search(Astar *self, PyObject *args)
     }
 
     int i=0;
-    uint32_t map[width * height];
+    uint32_t* map = (uint32_t*) malloc(sizeof(uint32_t) * (width * height));
+    //uint32_t map[width * height];
     memset(map, 0, sizeof(map));
     
     while (true) {
