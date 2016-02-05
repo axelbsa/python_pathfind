@@ -309,27 +309,8 @@ uint32_t search(
 
         // check if u is our target
         if (current == target) {
-            uint32_t path[height * width];
-            uint32_t path_size = reconstruct(rev_path, path, current, width);
-            int mark = 0;
-            //for (uint32_t i = 0; i < width * height; i++) {
-
-                //if((i % width) == 0) 
-                    //printf("\n");
-
-                //for (uint32_t y = 0; y < path_size; y++) {
-                    //if (path[y] == i) {
-                        //mark = 1;
-                    //} 
-                //}
-                //if (mark)
-                    //printf("V");
-                //else
-                    //printf("%c",map[i]);
-                //mark = 0;
-
-            //}
-            return *path;
+            //uint32_t path[height * width];
+            return current;
             //return current;
         }
 
@@ -498,6 +479,28 @@ int init(uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
         fprintf(stderr, "PATH FOUDN\n");
     else
         fprintf(stderr, "Error, could not find any path\n");
+
+
+    uint32_t* path = (uint32_t*)malloc(sizeof(uint32_t) * map_size);
+    uint32_t path_size = reconstruct(path_tbl, path, exit_point, width);
+    int mark = 0;
+    for (uint32_t i = 0; i < width * height; i++) {
+
+        if((i % width) == 0) 
+            printf("\n");
+
+        for (uint32_t y = 0; y < path_size; y++) {
+            if (path[y] == i) {
+                mark = 1;
+            } 
+        }
+        if (mark)
+            printf("V");
+        else
+            printf("%c",map[i]);
+        mark = 0;
+
+    }
 
 
     free_all(cost_lut, map, path_tbl, f_costs, g_costs, olist, clist);
