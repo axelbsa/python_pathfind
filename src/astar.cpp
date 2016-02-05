@@ -33,13 +33,14 @@ inline int valid(int c)
     return 0;
 }
 
-int read_map(FILE* file, uint8_t* map, uint32_t width, uint32_t height)
+int read_map(uint32_t* file, uint8_t* map, uint32_t width, uint32_t height)
 {
     for (uint32_t i = 0, n = width * height; i < n; ++i)
     {
-        int c;
+        int c = file[i];
 
-        while ((c = fgetc(file)) != EOF && !valid(c)) {}
+        // Uncomment if we need to check for bad char's
+        //while (!valid(c)) {}
 
         if (c == EOF)
         {
@@ -297,7 +298,6 @@ uint32_t search(
     else 
         heuristic = &manhattan;
 
-
     g_costs[start] = f_costs[start] = 0; 
     heap_insert(open_list, &open_list_size, f_costs, start);
 
@@ -312,23 +312,23 @@ uint32_t search(
             uint32_t path[height * width];
             uint32_t path_size = reconstruct(rev_path, path, current, width);
             int mark = 0;
-            for (uint32_t i = 0; i < width * height; i++) {
+            //for (uint32_t i = 0; i < width * height; i++) {
 
-                if((i % width) == 0) 
-                    printf("\n");
+                //if((i % width) == 0) 
+                    //printf("\n");
 
-                for (uint32_t y = 0; y < path_size; y++) {
-                    if (path[y] == i) {
-                        mark = 1;
-                    } 
-                }
-                if (mark)
-                    printf("V");
-                else
-                    printf("%c",map[i]);
-                mark = 0;
+                //for (uint32_t y = 0; y < path_size; y++) {
+                    //if (path[y] == i) {
+                        //mark = 1;
+                    //} 
+                //}
+                //if (mark)
+                    //printf("V");
+                //else
+                    //printf("%c",map[i]);
+                //mark = 0;
 
-            }
+            //}
             return *path;
             //return current;
         }
@@ -338,11 +338,16 @@ uint32_t search(
 #endif
         closed_list[current] = 1;
 
-        uint32_t num = ALLOW_DIAGONAL ? 4 : 8;
+        uint32_t num = (ALLOW_DIAGONAL == 0) ? 4 : 8;
 
-        uint32_t neighbour_count = find_neighbours(ux, uy, width, height, neighbours, 8);
+        uint32_t neighbour_count = find_neighbours(ux, uy, width, height, neighbours, num);
         for(uint32_t i = 0; i < neighbour_count; i++ ) {
             uint32_t next_node = neighbours[i];
+            
+            if (closed_list[next_node] == 1.0) {
+                continue; 
+            }
+            
             uint32_t vx = next_node % width;
             uint32_t vy = next_node / width;
 
@@ -350,6 +355,7 @@ uint32_t search(
             double lut = cost_lut[map_node];
 
             double movement_cost = 1.0;
+
             if(i > 3)
                 movement_cost = 1.414; // If diagonal adjust the cost
 
@@ -363,16 +369,14 @@ uint32_t search(
             printf("\t tentative_score: %g \n", tentative_score);
 #endif
 
-            if (closed_list[next_node] == 1.0) {
-                continue; 
-            }else if (tentative_score < g_costs[next_node]) {
+            if (tentative_score < g_costs[next_node]) {
                 rev_path[next_node] = current;
                 g_costs[next_node] = tentative_score;
 
                 //double man_costs = heuristic(vx, vy, tx, ty);
                 double man_costs = octile_distance(vx, vy, tx, ty);
-                //if(!ALLOW_DIAGONAL)
-                    //man_costs += cross(vx, vy, sx, sy, tx, ty) * NUDGE_FACTOR;
+                if(!ALLOW_DIAGONAL)
+                    man_costs += cross(vx, vy, sx, sy, tx, ty) * NUDGE_FACTOR;
                 
                 f_costs[next_node] = g_costs[next_node] + man_costs;
                 heap_insert(open_list, &open_list_size, f_costs, next_node);
@@ -396,54 +400,55 @@ void free_all(double* a, uint8_t* b,
     free(g);
 }
 
-int main(int argc, char** argv)
+int init(uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
+        uint32_t* world, uint32_t width, uint32_t height)
 {
     long coordinates[4] = {-1, -1, -1, -1};
 
-    if (argc < 6) {
-        fprintf(stderr, "Usage: %s <start-x> <start-y> <target-x> <target-y> <map-file>\n", argv[0]);
-        return 1;
-    }
+    //if (argc < 6) {
+        //fprintf(stderr, "Usage: %s <start-x> <start-y> <target-x> <target-y> <map-file>\n", argv[0]);
+        //return 1;
+    //}
 
-    for (int i = 1; i < argc && i < 5; ++i)
-    {
-        char* pos = NULL;
-        coordinates[i - 1] = strtol(argv[i], &pos, 0);
+    //for (int i = 1; i < argc && i < 5; ++i)
+    //{
+        //char* pos = NULL;
+        //coordinates[i - 1] = strtol(argv[i], &pos, 0);
 
-        if (pos == NULL || *pos != '\0' || coordinates[i-1] < 0)
-        {
-            fprintf(stderr, "'%s' is not a valid map coordinate\n", argv[i]);
-            return 1;
-        }
-    }
+        //if (pos == NULL || *pos != '\0' || coordinates[i-1] < 0)
+        //{
+            //fprintf(stderr, "'%s' is not a valid map coordinate\n", argv[i]);
+            //return 1;
+        //}
+    //}
 
     // Parse map file
-    FILE* file = fopen(argv[5], "r");
-    if (file == NULL) {
-        fprintf(stderr, "'%s' is not a valid map\n", argv[5]);
-        return EXIT_FAILURE;
-    }
+    //FILE* file = fopen(argv[5], "r");
+    //if (file == NULL) {
+        //fprintf(stderr, "'%s' is not a valid map\n", argv[5]);
+        //return EXIT_FAILURE;
+    //}
 
-    // Extract map metadata (width and height) from file
-    uint32_t width, height;
-    if (!read_metadata(file, &width, &height)) {
-        fclose(file);
-        fprintf(stderr, "'%s' is not a valid map\n", argv[5]);
-        return EXIT_FAILURE;
-    }
+    //// Extract map metadata (width and height) from file
+    //uint32_t width, height;
+    //if (!read_metadata(file, &width, &height)) {
+        //fclose(file);
+        //fprintf(stderr, "'%s' is not a valid map\n", argv[5]);
+        //return EXIT_FAILURE;
+    //}
 
     // Parse coordinates
 
     // Check that given coordinates are legal
-    if (coordinates[0] >= width || coordinates[1] >= height) {
-        fclose(file);
-        fprintf(stderr, "(%ld,%ld) is not a point in the map!\n", coordinates[0], coordinates[1]);
-        return EXIT_FAILURE;
-    } else if (coordinates[0] >= width || coordinates[1] >= height) {
-        fclose(file);
-        fprintf(stderr, "(%ld,%ld) is not a point in the map!\n", coordinates[0], coordinates[1]);
-        return EXIT_FAILURE;
-    }
+    //if (coordinates[0] >= width || coordinates[1] >= height) {
+        //fclose(file);
+        //fprintf(stderr, "(%ld,%ld) is not a point in the map!\n", coordinates[0], coordinates[1]);
+        //return EXIT_FAILURE;
+    //} else if (coordinates[0] >= width || coordinates[1] >= height) {
+        //fclose(file);
+        //fprintf(stderr, "(%ld,%ld) is not a point in the map!\n", coordinates[0], coordinates[1]);
+        //return EXIT_FAILURE;
+    //}
 
     size_t map_size = width * height;
     double* cost_lut = (double*) malloc(sizeof(double) * 256);
@@ -467,20 +472,21 @@ int main(int argc, char** argv)
     memset(clist, -1, sizeof(uint8_t) * map_size);
 
     // Parse map file
-    if (!read_map(file, map, width, height))
+    if (!read_map(world, map, width, height))
     {
         free_all(cost_lut, map, path_tbl, f_costs, g_costs, olist, clist);
-        fclose(file);
-        fprintf(stderr, "Couldn't parse map '%s'\n", argv[5]);
+        fprintf(stderr, "Couldn't parse map\n");
         return 1;
     }
 
-    fclose(file);
+    //fclose(file);
 
     // Make a cost look-up table
     //set_cost_lut(cost_lut, width * height + 1);
-    uint32_t start = coordinates[1] * width + coordinates[0];
-    uint32_t target = coordinates[3] * width + coordinates[2];
+    //uint32_t start = coordinates[1] * width + coordinates[0];
+    //uint32_t target = coordinates[3] * width + coordinates[2];
+    uint32_t start = sy * width + sx;
+    uint32_t target = dy * width + dx;
 
     clock_t t = clock();
     uint32_t exit_point = search(map, width, height, cost_lut, path_tbl, f_costs, g_costs, olist, clist, start, target);
