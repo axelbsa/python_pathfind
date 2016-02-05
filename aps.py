@@ -5,20 +5,18 @@ import time
 import pathfinding as p
 
 
-
-
 class ApsAstar():
     """
-    Start X (sx), Start Y (sy), 
+    Start X (sx), Start Y (sy),
     Destination X (dx), Destination Y (dy)
     World represents a 1D array (list) of the world
     factor? have no idea!
-    
+
     Width and Height of the map for calculation of 1d array
     """
 
     astar = p.Astar()
-    
+
     def __init__(self, sx, sy, dx, dy, world, width, height, factor=None):
         self.factor = factor
         self.world = world
@@ -36,13 +34,15 @@ class ApsAstar():
     def set_astar_params(self):
         # Not implemented
         astar.set_params()
-        
 
     def search(self, ALLOW_DIAGONAL=1):
         path = self.astar.search(self.sx, self.sy, self.dx, self.dy,
                             self.world, self.width, self.height,
                             ALLOW_DIAGONAL)
-        print path
+        print "----"
+        print "Path: ",
+        print [(x % width, x // width) for x in path][::-1]
+        print "----"
 
 
 D = 1.0

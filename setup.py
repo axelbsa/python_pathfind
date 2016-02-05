@@ -5,6 +5,7 @@ from distutils.core import setup, Extension
 
 module1 = Extension('pathfinding',
         include_dirs=['/usr/local/include'],
+        extra_compile_args=['-g'],
         sources=['src/main.cpp', 'src/astar.cpp'])
 
 setup(name='PackageName',

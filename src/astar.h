@@ -12,7 +12,7 @@ extern uint32_t search(
         );
 
 extern int init(uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
-        uint32_t* world, uint32_t width, uint32_t height
+        uint32_t* world, uint32_t width, uint32_t height, uint32_t* path
         );
 
 extern char* test();

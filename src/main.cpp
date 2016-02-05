@@ -53,8 +53,10 @@ static PyObject *Astar_search(Astar *self, PyObject *args)
 
     int i=0;
     uint32_t* map = (uint32_t*) malloc(sizeof(uint32_t) * (width * height));
+    uint32_t* path = (uint32_t*) malloc(sizeof(uint32_t) * (width * height));
     //uint32_t map[width * height];
-    memset(map, 0, sizeof(map));
+    memset(map, 0, sizeof(uint32_t) * (width * height));
+    memset(path, 0, sizeof(uint32_t) * (width * height));
     
     while (true) {
         PyObject *next = PyIter_Next(iter);
@@ -65,20 +67,20 @@ static PyObject *Astar_search(Astar *self, PyObject *args)
 
         char* s = PyString_AsString(next);
         map[i++] = s[0];
-
-        //printf("%s", s);
-
-        //if (i% 512 == 0){
-            //printf("\n");
-        //}
-        // do something with foo
     }
 
-    printf("We got following ints\n");
-    printf("sx=%d sy=%d dx=%d dy=%d width=%d height=%d \n",sx ,sy ,dx ,dy ,width ,height);
-    int a = init(sx, sy, dx, dy, map, width, height);
+    //printf("We got following ints\n");
+    //printf("sx=%d sy=%d dx=%d dy=%d width=%d height=%d \n",sx ,sy ,dx ,dy ,width ,height);
+    int a = init(sx, sy, dx, dy, map, width, height, path);
+    
+    PyObject *lst = PyList_New(a);
+    for(i=0; i<a; i++){
+        PyList_SET_ITEM(lst, i, Py_BuildValue("i", path[i]) );
+    }
 
-    return Py_BuildValue("i", 1);
+    free(map);
+    free(path);
+    return lst;
 }
 
 static int Astar_init(Astar *self, PyObject *args, PyObject *kwds) {

@@ -96,51 +96,6 @@ inline uint32_t heap_remove(uint32_t* heap, uint32_t* heap_size, double* fcosts)
     return removed_point;
 }
 
-int read_metadata(FILE* file, uint32_t* width, uint32_t* height)
-{
-    char line[2048];
-    char* pos;
-    
-    int status = 0;
-
-    for (int i = 0; i < 4 && !feof(file); ++i)
-    {
-        fgets(line, sizeof(line), file);
-
-        for (size_t j = 0; j < sizeof(line); ++j)
-        {
-            if (line[j] < 0x20 || line[j] > 0x7e)
-            {
-                line[j] = '\0';
-                break;
-            }
-        }
-
-        if (strncmp("width ", line, 6) == 0)
-        {
-            pos = NULL;
-            *width = strtoul(&line[6], &pos, 0);
-            if (pos == NULL || *pos != '\0')
-            {
-                return 0;
-            }
-            status |= 1;
-        }
-        else if (strncmp("height ", line, 7) == 0)
-        {
-            pos = NULL;
-            *height = strtoul(&line[7], &pos, 0);
-            if (pos == NULL || *pos != '\0')
-            {
-                return 0;
-            }
-            status |= 2;
-        }
-    }
-
-    return !!(status & 3);
-}
-
 
 uint32_t cross(uint32_t sx, uint32_t sy,
                uint32_t cx, uint32_t cy,
@@ -241,15 +196,15 @@ uint32_t find_neighbours(int ux, int uy, int width, int height, uint32_t* neighb
 
 uint32_t reconstruct(uint32_t* rev_path, uint32_t* path, uint32_t current, uint32_t width)
 {
-    uint32_t path_size = 0;
+    int path_size = 0;
     uint32_t node = rev_path[current];
 
     while (node != 0) {
-        //printf("Node: x=%d, y=%d\n", node % width, node / width);
-        //path.append(node);
+        //printf("Node: node=%d, x=%d, y=%d\n", node, node % width, node / width);
         path[path_size++] = node;
         node = rev_path[node];
     }
+
 
     return path_size;
 }
@@ -258,7 +213,7 @@ uint32_t search(
         const uint8_t* map, uint32_t width, uint32_t height, 
         double* cost_lut, uint32_t* rev_path, double* f_costs, double* g_costs,
         uint32_t* open_list, uint8_t* closed_list,
-        uint32_t start, uint32_t target
+        uint32_t start, uint32_t target, uint32_t* path
         )
 {
 
@@ -276,7 +231,7 @@ uint32_t search(
         f_costs[i] = width * height + 1.0;
     }
 
-    printf("w:%d h:%d start:%d end:%d\n", width, height, start, target);
+    //printf("w:%d h:%d start:%d end:%d\n", width, height, start, target);
 
     cost_lut['.'] = 1.0;
     cost_lut['G'] = 1.0;
@@ -293,10 +248,11 @@ uint32_t search(
 
     double (*heuristic)(uint32_t, uint32_t, uint32_t, uint32_t);
     
-    if (ALLOW_DIAGONAL) 
-        heuristic = &octile_distance;
-    else 
-        heuristic = &manhattan;
+    //if (ALLOW_DIAGONAL) 
+        //heuristic = &octile_distance;
+    //else 
+        //heuristic = &manhattan;
+    heuristic = (ALLOW_DIAGONAL) ? &octile_distance : &manhattan;
 
     g_costs[start] = f_costs[start] = 0; 
     heap_insert(open_list, &open_list_size, f_costs, start);
@@ -309,9 +265,13 @@ uint32_t search(
 
         // check if u is our target
         if (current == target) {
-            //uint32_t path[height * width];
-            return current;
-            //return current;
+            int map_size = width * height;
+            
+            //uint32_t* path = (uint32_t*)malloc(sizeof(uint32_t) * map_size);
+            //memset(path, 0, map_size);
+
+            int path_size = reconstruct(rev_path, path, current, width);
+            return path_size;
         }
 
 #ifdef DEBUG
@@ -354,8 +314,8 @@ uint32_t search(
                 rev_path[next_node] = current;
                 g_costs[next_node] = tentative_score;
 
-                //double man_costs = heuristic(vx, vy, tx, ty);
-                double man_costs = octile_distance(vx, vy, tx, ty);
+                double man_costs = heuristic(vx, vy, tx, ty);
+                //double man_costs = octile_distance(vx, vy, tx, ty);
                 if(!ALLOW_DIAGONAL)
                     man_costs += cross(vx, vy, sx, sy, tx, ty) * NUDGE_FACTOR;
                 
@@ -367,75 +327,25 @@ uint32_t search(
 
     }
 
-
     return 0x0;
 }
 
-void free_all(double* a, uint8_t* b,
-              uint32_t* c, double* d, 
+void free_all(double* a, double* b,
               double* e, uint32_t* f,
               uint8_t* g) {
 
-    free(a); free(b); free(c);
-    free(d); free(e); free(f);
+    free(a); free(b); 
+    free(e); free(f);
     free(g);
 }
 
 int init(uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
-        uint32_t* world, uint32_t width, uint32_t height)
+        uint32_t* world, uint32_t width, uint32_t height, uint32_t* path)
 {
-    long coordinates[4] = {-1, -1, -1, -1};
-
-    //if (argc < 6) {
-        //fprintf(stderr, "Usage: %s <start-x> <start-y> <target-x> <target-y> <map-file>\n", argv[0]);
-        //return 1;
-    //}
-
-    //for (int i = 1; i < argc && i < 5; ++i)
-    //{
-        //char* pos = NULL;
-        //coordinates[i - 1] = strtol(argv[i], &pos, 0);
-
-        //if (pos == NULL || *pos != '\0' || coordinates[i-1] < 0)
-        //{
-            //fprintf(stderr, "'%s' is not a valid map coordinate\n", argv[i]);
-            //return 1;
-        //}
-    //}
-
-    // Parse map file
-    //FILE* file = fopen(argv[5], "r");
-    //if (file == NULL) {
-        //fprintf(stderr, "'%s' is not a valid map\n", argv[5]);
-        //return EXIT_FAILURE;
-    //}
-
-    //// Extract map metadata (width and height) from file
-    //uint32_t width, height;
-    //if (!read_metadata(file, &width, &height)) {
-        //fclose(file);
-        //fprintf(stderr, "'%s' is not a valid map\n", argv[5]);
-        //return EXIT_FAILURE;
-    //}
-
-    // Parse coordinates
-
-    // Check that given coordinates are legal
-    //if (coordinates[0] >= width || coordinates[1] >= height) {
-        //fclose(file);
-        //fprintf(stderr, "(%ld,%ld) is not a point in the map!\n", coordinates[0], coordinates[1]);
-        //return EXIT_FAILURE;
-    //} else if (coordinates[0] >= width || coordinates[1] >= height) {
-        //fclose(file);
-        //fprintf(stderr, "(%ld,%ld) is not a point in the map!\n", coordinates[0], coordinates[1]);
-        //return EXIT_FAILURE;
-    //}
-
     size_t map_size = width * height;
     double* cost_lut = (double*) malloc(sizeof(double) * 256);
 
     uint8_t* map = (uint8_t*) malloc(sizeof(uint8_t) * map_size * 2);
-    uint32_t* path_tbl = (uint32_t*) malloc(sizeof(uint32_t) * map_size);
 
     double* f_costs = (double*) malloc(sizeof(double) * map_size * 8);
     double* g_costs = (double*) malloc(sizeof(double) * map_size * 8);
@@ -444,6 +354,7 @@ int init(uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
     uint8_t* clist = (uint8_t*) malloc(sizeof(uint32_t) * map_size);
 
     memset(map, 1.0, sizeof(uint8_t) * map_size * 2);
+    memset(path, 0, sizeof(uint32_t) * map_size);
 
     memset(f_costs, map_size + 1, sizeof(double) * map_size * 8);
     memset(g_costs, map_size + 1, sizeof(double) * map_size * 8);
@@ -455,54 +366,26 @@ int init(uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
     // Parse map file
     if (!read_map(world, map, width, height))
     {
-        free_all(cost_lut, map, path_tbl, f_costs, g_costs, olist, clist);
+        free_all(cost_lut, f_costs, g_costs, olist, clist);
         fprintf(stderr, "Couldn't parse map\n");
         return 1;
     }
 
-    //fclose(file);
-
-    // Make a cost look-up table
-    //set_cost_lut(cost_lut, width * height + 1);
-    //uint32_t start = coordinates[1] * width + coordinates[0];
-    //uint32_t target = coordinates[3] * width + coordinates[2];
     uint32_t start = sy * width + sx;
     uint32_t target = dy * width + dx;
 
     clock_t t = clock();
-    uint32_t exit_point = search(map, width, height, cost_lut, path_tbl, f_costs, g_costs, olist, clist, start, target);
+
+    uint32_t path_size = search(map, width, height, cost_lut, path,
+                                f_costs, g_costs, olist, clist, start,
+                                target, path);
     
     t = clock() - t;
     fprintf(stderr, "It took me (%f seconds).\n",((float)t)/CLOCKS_PER_SEC);
 
-    if(exit_point) 
-        fprintf(stderr, "PATH FOUND\n");
-    else
-        fprintf(stderr, "Error, could not find any path\n");
+    free_all(cost_lut, f_costs, g_costs, olist, clist);
 
 
-    uint32_t* path = (uint32_t*)malloc(sizeof(uint32_t) * map_size);
-    uint32_t path_size = reconstruct(path_tbl, path, exit_point, width);
-    int mark = 0;
-    for (uint32_t i = 0; i < width * height; i++) {
-
-        if((i % width) == 0) 
-            printf("\n");
-
-        for (uint32_t y = 0; y < path_size; y++) {
-            if (path[y] == i) {
-                mark = 1;
-            } 
-        }
-        if (mark)
-            printf("V");
-        else
-            printf("%c",map[i]);
-        mark = 0;
-
-    }
-
-
-    free_all(cost_lut, map, path_tbl, f_costs, g_costs, olist, clist);
+    return path_size;
 
 }
