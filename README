@@ -6,6 +6,8 @@ apt-get install python-dev
 
 or python-devel for fedora 
 
+for windows i think it's included
+
 
 compile with: python setup.py build_ext -i
 
