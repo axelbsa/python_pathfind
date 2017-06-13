@@ -16,16 +16,18 @@ cost_lut['T'] = infinity
 cost_lut['S'] = 5.0
 cost_lut['W'] = 15.0
 
+
 def read_metadata(filename):
     with open(filename) as f:
         map_type = f.readline()
+        assert map_type  # This field isn't used but assert it anyway
         height = int(f.readline().split()[1])
         width = int(f.readline().split()[1])
         f.readline()
         s_map = [[0 for x in range(width)] for y in range(height)]
         for i, line in enumerate(f):
             for j, char in enumerate(line):
-                if j == 512:
+                if j == width:
                     break
                 s_map[i][j] = char
 
@@ -38,8 +40,9 @@ def reconstruct(rev_path, current, s_map, start, end):
     while node != 0:
         path.append(node)
         node = rev_path[node]
-    
+
     return path
+
 
 def write_map(s_map, start, end, path):
     with open("dump", 'w') as f:
@@ -144,7 +147,7 @@ def search(s_map, sx, sy, dx, dy, start, end, g_cost, f_cost, height, width):
             s_value = s_map[vx][vy]
             lut = cost_lut[s_value]
             tentative_score = g_cost[current] + (1.0 * lut)
-            if False:
+            if debug:
                 print "\t\tG_cost: %d | tentative_cost: %d" % (g_cost[next_node], tentative_score)
 
             if marked[next_node] == 1:
@@ -164,7 +167,8 @@ def search(s_map, sx, sy, dx, dy, start, end, g_cost, f_cost, height, width):
 
 
 def usage():
-    return "./program <mapfile> <start_y> <start_x> <end_y> <end_x>"
+    return "./program <mapfile> <start_x> <start_y> <end_x> <end_y>"
+
 
 if __name__ == '__main__':
     if len(sys.argv) < 6:

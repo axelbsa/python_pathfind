@@ -63,12 +63,13 @@ def read_metadata(filename):
         height = int(f.readline().split()[1])
         width = int(f.readline().split()[1])
         f.readline()
-        #s_map = [[0 for x in range(width)] for y in range(height)]
+        print height, width
+        # s_map = [[0 for x in range(width)] for y in range(height)]
         s_map = [0] * (width * height)
         i = 0
         for k, line in enumerate(f):
             for j, char in enumerate(line):
-                if j == 512:
+                if j == width:
                     break
                 s_map[i] = char
                 i += 1
@@ -77,7 +78,7 @@ def read_metadata(filename):
 
 
 def usage():
-    return "./program <mapfile> <start_y> <start_x> <end_y> <end_x>"
+    return "./program <mapfile> <start_x> <start_y> <end_x> <end_y>"
 
 
 if __name__ == '__main__':
